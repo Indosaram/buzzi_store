@@ -9,7 +9,7 @@ import PropTypes from "prop-types";
 import Fab from "@material-ui/core/Fab";
 import Zoom from "@material-ui/core/Zoom";
 import { makeStyles } from "@material-ui/core/styles";
-import productsData from "../script/productsData.json";
+import productsData from "./productsData.json";
 
 const useStyles = makeStyles((theme) => ({
   root: {
