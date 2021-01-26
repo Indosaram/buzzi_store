@@ -1,7 +1,9 @@
+import os
 import json
 import re
-import requests
 import platform
+
+import requests
 
 from bs4 import BeautifulSoup as bs
 
@@ -90,7 +92,11 @@ class PpomppuHelper:
 
     def save_json(self, data):
         jsondata = {"data": data}
-        with open("productsData.json", "w", encoding='utf-8') as f:
+        with open(
+            os.path.join(os.getcwd(), 'src','productsData.json'),
+            'w',
+            encoding='utf-8',
+        ) as f:
             json.dump(jsondata, f, ensure_ascii=False, indent=4)
         print('Finish saving .json')
 
