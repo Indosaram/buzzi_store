@@ -58,7 +58,6 @@ class ClienHelper:
         raw_title = self.driver.find_element_by_xpath(
             "/html/head/meta[@property='og:title']"
         ).text.split('|')[0]
-        
 
         prod_detail['description'] = self.driver.find_element_by_xpath(
             "/html/head/meta[@property='og:description']"

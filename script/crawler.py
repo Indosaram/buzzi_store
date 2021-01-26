@@ -50,8 +50,8 @@ if __name__ == "__main__":
             'boardURL': 'http://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu&hotlist_flag=999',
         },
         'ruliweb': {
-            'baseURL': 'https://bbs.ruliweb.com/news/board/1020'
-            'boardURL': 'https://bbs.ruliweb.com/news/board/1020?view_best=1'
+            'baseURL': 'https://bbs.ruliweb.com/news/board/1020',
+            'boardURL': 'https://bbs.ruliweb.com/news/board/1020?view_best=1',
         },
     }
 
