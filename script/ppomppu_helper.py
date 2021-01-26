@@ -1,8 +1,5 @@
-import os
-import json
 import re
-import platform
-import urllib.request
+import hashlib
 
 import requests
 
@@ -12,14 +9,11 @@ from selenium_loader import SeleniumLoader
 
 
 class PpomppuHelper:
-    def __init__(self):
-        if platform.system() == 'Windows':
-            webdriver_path = 'C:\\chromedriver\\chromedriver.exe'
-        else:
-            webdriver_path = './script/chromedriver'
-        self.driver = SeleniumLoader(webdriver_path).driver
-        self.baseURL = 'http://www.ppomppu.co.kr/zboard/'
-        self.boardURL = self.baseURL + 'zboard.php?id=ppomppu&hotlist_flag=999'
+    def __init__(self, param_common, param_ppompu):
+        self.driver = SeleniumLoader(param_common['webdriver_path']).driver
+        self.json_path = param_common['json_path']
+        self.baseURL = param_ppompu['baseURL']
+        self.boardURL = param_ppompu['boardURL']
 
     def run(self):
         self.driver.get(self.boardURL)
@@ -34,6 +28,7 @@ class PpomppuHelper:
         ]
         prod_details = []
 
+        print('🎁 뽐뿌')
         for idx, route in enumerate(routes):
             print(f'-> Processing {idx+1}/{len(routes)}', end='\r')
             try:
@@ -50,7 +45,6 @@ class PpomppuHelper:
 
         # Get product details
         prod_detail = {}
-        prod_detail['id'] = idx
         prod_detail['origin'] = "뽐뿌"
 
         # this part is little treaky, better find another approach later
@@ -60,7 +54,6 @@ class PpomppuHelper:
         prod_detail['price'], prod_detail['shipping'] = fragments[-1][1].split(
             '/'
         )
-        prod_detail['title'] = ' '.join(raw_title.split(' ')[1:])
 
         innerHTML = self.driver.find_element_by_class_name(
             'sub-top-text-box'
@@ -70,37 +63,34 @@ class PpomppuHelper:
         prod_detail['date'] = (
             re.compile(r'\d\d\d\d-\d\d-\d\d').search(soup.text).group()
         )
-        prod_detail['hit'] = re.compile(r'조회수: \d+').search(soup.text).group()
-        link_original = self.driver.find_element_by_class_name(
-            'wordfix'
-        ).text.split(' ')[1]
-        res = requests.get(link_original)
-        if res.reason == 'OK':
-            prod_detail['link'] = res.url
-        else:
-            raise KeyError
+        prod_detail['hit'] = (
+            re.compile(r'조회수: \d+').search(soup.text).group().split(' ')[1]
+        )
+        prod_detail['up'] = (
+            re.compile(r'추천수: \d+').search(soup.text).group().split(' ')[1]
+        )
 
         prod_detail['origin_url'] = self.driver.find_element_by_xpath(
             "/html/head/meta[@property='og:url']"
         ).get_attribute('content')
 
+        # Parse prod page's metadata
+        link_to_prod = self.driver.find_element_by_class_name(
+            'wordfix'
+        ).text.split(' ')[1]
+        res = requests.get(link_to_prod)
+        if res.reason == 'OK':
+            prod_detail['link'] = res.url
+        else:
+            raise KeyError
+
         soup = bs(res.text, features="html.parser")
-        prod_detail['thumbnail'] = soup.find('meta',{"property":"og:image"})['content']
+        prod_detail['thumbnail'] = soup.find('meta', {"property": "og:image"})[
+            'content'
+        ]
+        prod_detail['title'] = soup.find('title').text
+        prod_detail['id'] = hashlib.sha1(
+            prod_detail['title'].encode()
+        ).hexdigest()
 
         return prod_detail
-
-    def save_json(self, data):
-        jsondata = {"products": data}
-        with open(
-            os.path.join(os.getcwd(), 'src', 'productsData.json'),
-            'w',
-            encoding='utf-8',
-        ) as f:
-            json.dump(jsondata, f, ensure_ascii=False, indent=4)
-        print('Finish saving .json')
-
-
-if __name__ == '__main__':
-    ph = PpomppuHelper()
-    prod_details = ph.run()
-    ph.save_json(prod_details)

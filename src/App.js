@@ -91,6 +91,7 @@ class App extends React.Component {
                         key={product.id}
                         title={product.title}
                         hit={product.hit}
+                        up={product.up}
                         price={product.price}
                         shipping={product.shipping}
                         description={product.description}

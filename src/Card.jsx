@@ -52,6 +52,11 @@ const useStyles = makeStyles({
     color: "gray",
     marginRight: 5,
   },
+  shopInfo__up: {
+    color: "gray",
+    marginRight: 5,
+    borderRadius: 3,
+  },
   shopInfo__origin: {
     backgroundColor: "#FE6B8B",
     marginRight: 5,
@@ -85,6 +90,7 @@ const useStyles = makeStyles({
 function ProductCard({
   title,
   hit,
+  up,
   price,
   shipping,
   description,
@@ -109,7 +115,10 @@ function ProductCard({
           </div>
           <p className={classes.shopInfo}>
             <Box component="span" className={classes.shopInfo__hit}>
-              조회수 {hit}
+              {hit}
+            </Box>
+            <Box component="span" className={classes.shopInfo__up}>
+              {up}
             </Box>
             <Box component="span" className={classes.shopInfo__origin}>
               {origin}
@@ -152,6 +161,7 @@ function ProductCard({
 ProductCard.propTypes = {
   title: PropTypes.string.isRequired,
   hit: PropTypes.number.isRequired,
+  up: PropTypes.number.isRequired,
   price: PropTypes.string.isRequired,
   shipping: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,
