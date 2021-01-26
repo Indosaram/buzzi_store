@@ -4,7 +4,7 @@ from selenium import webdriver
 
 
 class SeleniumLoader:
-    def __init__(self, dir_selenium):
+    def __init__(self, webdriverpath):
         options = webdriver.ChromeOptions()
         options.add_argument('headless')
         options.add_argument(
@@ -18,7 +18,6 @@ class SeleniumLoader:
         }
         options.add_experimental_option("prefs", prefs)
         options.add_experimental_option('excludeSwitches', ['enable-logging'])
-        webdriverpath = os.path.join(dir_selenium, 'chromedriver.exe')
 
         self.driver = webdriver.Chrome(webdriverpath, options=options)
 

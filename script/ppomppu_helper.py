@@ -11,10 +11,10 @@ from selenium_loader import SeleniumLoader
 class PpomppuHelper:
     def __init__(self):
         if platform.system() == 'Windows':
-            dir_selenium = 'C:\\chromedriver\\'
+            webdriver_path = 'C:\\chromedriver\\chromedriver.exe'
         else:
-            dir_selenium = './chromedriver'
-        self.driver = SeleniumLoader(dir_selenium).driver
+            webdriver_path = './chromedriver'
+        self.driver = SeleniumLoader(webdriver_path).driver
         self.baseURL = 'http://www.ppomppu.co.kr/zboard/'
         self.boardURL = self.baseURL + 'zboard.php?id=ppomppu&hotlist_flag=999'
 
