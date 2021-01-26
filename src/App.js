@@ -3,13 +3,13 @@ import { Grid } from "@material-ui/core";
 import "./App.css";
 import Header from "./Header";
 import ProductCard from "./Card";
-import productsData from "./productsData.json";
 import useScrollTrigger from "@material-ui/core/useScrollTrigger";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 import PropTypes from "prop-types";
 import Fab from "@material-ui/core/Fab";
 import Zoom from "@material-ui/core/Zoom";
 import { makeStyles } from "@material-ui/core/styles";
+import productsData from ".script/productsData.json";
 
 const useStyles = makeStyles((theme) => ({
   root: {
