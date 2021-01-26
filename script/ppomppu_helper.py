@@ -2,6 +2,7 @@ import os
 import json
 import re
 import platform
+import urllib.request
 
 import requests
 
@@ -36,19 +37,21 @@ class PpomppuHelper:
         for idx, route in enumerate(routes):
             print(f'-> Processing {idx+1}/{len(routes)}', end='\r')
             try:
-                prod_details.append(self._get_product_data(route))
+                prod_details.append(self._get_product_data(idx, route))
             except:
                 continue
-            print('')
+        print('')
         self.driver.close()
 
         return prod_details
 
-    def _get_product_data(self, route):
+    def _get_product_data(self, idx, route):
         self.driver.get(self.baseURL + route)
 
         # Get product details
         prod_detail = {}
+        prod_detail['id'] = idx
+        prod_detail['origin'] = "뽐뿌"
 
         # this part is little treaky, better find another approach later
         raw_title = self.driver.find_element_by_class_name('view_title2').text
@@ -77,23 +80,19 @@ class PpomppuHelper:
         else:
             raise KeyError
 
-        innerHTML = self.driver.find_element_by_class_name(
-            'board-contents'
-        ).get_attribute('innerHTML')
-        soup = bs(innerHTML, features="html.parser")
-        img_selector = soup.select_one('img')
-        prod_detail['img'] = (
-            f"https:{str(img_selector['src'])}"
-            if img_selector is not None
-            else None
-        )
+        prod_detail['origin_url'] = self.driver.find_element_by_xpath(
+            "/html/head/meta[@property='og:url']"
+        ).get_attribute('content')
+
+        soup = bs(res.text, features="html.parser")
+        prod_detail['thumbnail'] = soup.find('meta',{"property":"og:image"})['content']
 
         return prod_detail
 
     def save_json(self, data):
-        jsondata = {"data": data}
+        jsondata = {"products": data}
         with open(
-            os.path.join(os.getcwd(), 'src','productsData.json'),
+            os.path.join(os.getcwd(), 'src', 'productsData.json'),
             'w',
             encoding='utf-8',
         ) as f:
