@@ -13,7 +13,7 @@ class PpomppuHelper:
         if platform.system() == 'Windows':
             webdriver_path = 'C:\\chromedriver\\chromedriver.exe'
         else:
-            webdriver_path = './chromedriver'
+            webdriver_path = './script/chromedriver'
         self.driver = SeleniumLoader(webdriver_path).driver
         self.baseURL = 'http://www.ppomppu.co.kr/zboard/'
         self.boardURL = self.baseURL + 'zboard.php?id=ppomppu&hotlist_flag=999'
