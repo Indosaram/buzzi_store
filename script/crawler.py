@@ -17,7 +17,7 @@ class MainCrawler:
         self.param_ppompu = param['ppompu']
         self.param_clien = param['clien']
         self.param_ruliweb = param['ruliweb']
-        self.param_coolnjoy = param['coolnjoy']
+        self.param_coolnjoy = param['coolenjoy']
 
     def _run_ppompu(self):
         ph = PpomppuHelper(self.param_common, self.param_ppompu)
