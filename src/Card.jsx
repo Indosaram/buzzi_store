@@ -30,44 +30,52 @@ const useStyles = makeStyles({
   },
   media: {
     height: 0,
-    paddingTop: "56.25%", // 16:9
+    paddingTop: "100%", // 16:9
   },
   title: {
-    height: 28,
+    height: 62,
   },
   title__text: {
-    fontSize: 20,
+    height: 62,
+    fontSize: 14,
     color: "black",
     fontFamily: "paybooc-Bold",
     fontWeight: 800,
-    textOverflow: "ellipsis",
+    overflow: "hidden",
     margin: 0,
   },
   date: {},
   date__text: {
-    fontSize: 14,
+    fontSize: 11,
     fontFamily: "paybooc-Medium",
     color: "gray",
   },
   description: {},
   description__text: {
-    fontSize: 16,
+    fontSize: 12,
     color: "gray",
     textOverflow: "ellipsis",
     fontFamily: "paybooc-Medium",
   },
-  shopInfo: {
-    fontSize: 14,
+  hitsAndUps: {
+    fontSize: 12,
+    fontWeight: 600,
     fontFamily: "paybooc-Medium",
   },
-  shopInfo__hit: {
+  hitsAndUps__hit: {
     color: "gray",
     marginRight: 5,
   },
-  shopInfo__up: {
+  hitsAndUps__up: {
     color: "gray",
     marginRight: 5,
     borderRadius: 3,
+  },
+  shopInfo: {
+    fontSize: 12,
+    fontFamily: "paybooc-Medium",
+    margin: "10px auto",
+    height: 15
   },
   shopInfo__origin: {
     backgroundColor: "#FE6B8B",
@@ -91,13 +99,16 @@ const useStyles = makeStyles({
     padding: "0 30px",
     marginLeft: 8,
     marginBottom: 8,
+    fontSize: 11,
   },
   shareButton: {
     marginLeft: "auto",
     marginRight: 8,
     marginBottom: 8,
   },
-  prodDetail: {
+  prodDetail: {},
+  prodDetail__text: {
+    fontSize: 12,
     fontFamily: "paybooc-Medium",
   },
 });
@@ -143,42 +154,48 @@ function ProductCard({
         <CardContent>
           <div className={classes.title} href={link}>
             <Box component="div">
-              <Typography noWrap className={classes.title__text}>
+              <Typography className={classes.title__text}>
                 <Link target="_blank" href={origin_url}>
                   {title}
                 </Link>
               </Typography>
             </Box>
           </div>
-          <p className={classes.date}>
-            <Box component="div" className={classes.date__text}>
-              <Typography>{date}</Typography>
+          <div className={classes.date}>
+            <Box component="div">
+              <Typography className={classes.date__text}>{date}</Typography>
             </Box>
-          </p>
-          <p className={classes.shopInfo}>
-            <Box component="span" className={classes.shopInfo__hit}>
+          </div>
+          <div className={classes.hitsAndUps}>
+            <Box component="span" className={classes.hitsAndUps__hit}>
               조회수: {hit}
             </Box>
-            <Box component="span" className={classes.shopInfo__up}>
+          </div>
+          <div className={classes.hitsAndUps}>
+            <Box component="span" className={classes.hitsAndUps__up}>
               추천: {up}
             </Box>
+          </div>
+          <div className={classes.shopInfo}>
             <Box component="span" className={classes.shopInfo__origin}>
               {origin}
             </Box>
             <Box component="span" className={classes.shopInfo__shop}>
               {shop}
             </Box>
-          </p>
+          </div>
           <div className={classes.description}>
-            <Box component="div" className={classes.description__text}>
-              <Typography noWrap>{description}</Typography>
+            <Box component="div">
+              <Typography noWrap className={classes.description__text}>
+                {description}
+              </Typography>
             </Box>
           </div>
-          <p className={classes.prodDetail}>
-            <Typography>
+          <div className={classes.prodDetail}>
+            <Typography className={classes.prodDetail__text}>
               {price} / {shipping}
             </Typography>
-          </p>
+          </div>
         </CardContent>
         <CardActions disableSpacing>
           <Button
@@ -189,7 +206,7 @@ function ProductCard({
             color="primary"
             size="large"
           >
-            🎁 구경하기
+            🎁 Go!
           </Button>
           <IconButton
             className={classes.shareButton}

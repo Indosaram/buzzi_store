@@ -78,16 +78,21 @@ class App extends React.Component {
             <span className="loader__text">Loading...</span>
           </div>
         ) : (
-          <Grid container direction="column" className="app">
+          <Grid
+            container
+            direction="column"
+            className="app"
+            style={{ padding: "0 10px 10px" }}
+          >
             <Grid item className="app__header">
               <Header />
             </Grid>
             <Grid item container className="app__cards">
-              <Grid item xs={1} lg={2} />
-              <Grid item xs={10} lg={8}>
-                <Grid container spacing={4}>
+              <Grid item xs={0} sm={2} />
+              <Grid item xs={12} sm={8}>
+                <Grid container spacing={1}>
                   {products.map((product) => (
-                    <Grid item xs={12} sm={6} lg={4}>
+                    <Grid item xs={6} md={4}>
                       <LazyLoad key={product.id} placeholder={<Loading />}>
                         <ProductCard
                           key={product.id}
@@ -109,7 +114,7 @@ class App extends React.Component {
                   ))}
                 </Grid>
               </Grid>
-              <Grid item xs={1} lg={2} />
+              <Grid item xs={0} sm={2} />
             </Grid>
             <Grid item className="app__footer">
               <Footer />
