@@ -6,6 +6,7 @@ const useStyles = makeStyles((theme) => ({
   offset: theme.mixins.toolbar,
   root: {
     flexGrow: 1,
+    fontFamily: "paybooc-Medium",
   },
   footer: {
     backgroundColor: "white",
@@ -32,7 +33,12 @@ const Footer = () => {
       <div className={classes.root}>
         <Toolbar className={classes.footer}>
           <Typography className={classes.footer__text}>
-            ⓒ버찌스토어. 2021. 사이트 이용 시 일부 수수료를 받을 수 있음
+            ⓒ버찌스토어. 2021.
+          </Typography>
+        </Toolbar>
+        <Toolbar className={classes.footer}>
+          <Typography className={classes.footer__text}>
+            사이트 이용 시 일부 수수료를 받을 수 있음
           </Typography>
         </Toolbar>
       </div>

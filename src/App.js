@@ -11,6 +11,7 @@ import Fab from "@material-ui/core/Fab";
 import Zoom from "@material-ui/core/Zoom";
 import { makeStyles } from "@material-ui/core/styles";
 import productsData from "./productsData.json";
+import LazyLoad from "react-lazyload";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -46,6 +47,8 @@ function ScrollTop(props) {
     </Zoom>
   );
 }
+
+const Loading = () => <div className="loading">Loading...</div>;
 
 ScrollTop.propTypes = {
   children: PropTypes.element.isRequired,
@@ -85,27 +88,29 @@ class App extends React.Component {
                 <Grid container spacing={4}>
                   {products.map((product) => (
                     <Grid item xs={12} sm={6} lg={4}>
-                      <ProductCard
-                        key={product.id}
-                        title={product.title}
-                        date={product.date}
-                        hit={product.hit}
-                        up={product.up}
-                        price={product.price}
-                        shipping={product.shipping}
-                        description={product.description}
-                        thumbnail={product.thumbnail}
-                        link={product.link}
-                        origin_url={product.origin_url}
-                        origin={product.origin}
-                        shop={product.shop}
-                      />
+                      <LazyLoad key={product.id} placeholder={<Loading />}>
+                        <ProductCard
+                          key={product.id}
+                          title={product.title}
+                          date={product.date}
+                          hit={product.hit}
+                          up={product.up}
+                          price={product.price}
+                          shipping={product.shipping}
+                          description={product.description}
+                          thumbnail={product.thumbnail}
+                          link={product.link}
+                          origin_url={product.origin_url}
+                          origin={product.origin}
+                          shop={product.shop}
+                        />
+                      </LazyLoad>
                     </Grid>
                   ))}
                 </Grid>
               </Grid>
               <Grid item xs={1} lg={2} />
-            </Grid>            
+            </Grid>
             <Grid item className="app__footer">
               <Footer />
             </Grid>

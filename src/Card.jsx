@@ -54,6 +54,7 @@ const useStyles = makeStyles({
     fontSize: 16,
     color: "gray",
     textOverflow: "ellipsis",
+    fontFamily: "paybooc-Medium",
   },
   shopInfo: {
     fontSize: 14,
@@ -96,7 +97,9 @@ const useStyles = makeStyles({
     marginRight: 8,
     marginBottom: 8,
   },
-  prodDetail: {},
+  prodDetail: {
+    fontFamily: "paybooc-Medium",
+  },
 });
 
 function Alert(props) {
