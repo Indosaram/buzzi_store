@@ -92,6 +92,9 @@ const useStyles = makeStyles({
     marginRight: 8,
     marginBottom: 8,
   },
+  prodDetail:{
+    
+  }
 });
 
 function ProductCard({
@@ -177,8 +180,8 @@ function ProductCard({
 ProductCard.propTypes = {
   title: PropTypes.string.isRequired,
   date: PropTypes.string.isRequired,
-  hit: PropTypes.number.isRequired,
-  up: PropTypes.number.isRequired,
+  hit: PropTypes.string.isRequired,
+  up: PropTypes.string.isRequired,
   price: PropTypes.string.isRequired,
   shipping: PropTypes.string.isRequired,
   description: PropTypes.string.isRequired,

@@ -8,6 +8,7 @@ import requests
 from ppomppu_helper import PpomppuHelper
 from clien_helper import ClienHelper
 from ruliweb_helper import RuliwebHelper
+from coolenjoy_helper import CoolenjoyHelper
 
 
 class MainCrawler:
@@ -26,6 +27,12 @@ class MainCrawler:
 
     def _run_clien(self):
         ch = ClienHelper(self.param_common, self.param_clien)
+        prod_details = ch.run()
+
+        return prod_details
+
+    def _run_coolenjoy(self):
+        ch = CoolenjoyHelper(self.param_common, self.param_coolenjoy)
         prod_details = ch.run()
 
         return prod_details
@@ -94,7 +101,7 @@ if __name__ == "__main__":
             'boardURL': 'https://bbs.ruliweb.com/news/board/1020?view_best=1',
         },
         'clien': {},
-        'coolnjoy': {},
+        'coolenjoy': {},
     }
 
     mc = MainCrawler(param)

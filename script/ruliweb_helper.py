@@ -13,13 +13,13 @@ from exception import *
 
 
 class RuliwebHelper:
-    def __init__(self, param_common, param_clien):
+    def __init__(self, param_common, param_ruliweb):
         selenium_loader = SeleniumLoader(param_common['webdriver_path'])
         self.driver = selenium_loader.driver
         self.driver_exceptions = selenium_loader.exceptions
         self.json_path = param_common['json_path']
-        self.baseURL = param_clien['baseURL']
-        self.boardURL = param_clien['boardURL']
+        self.baseURL = param_ruliweb['baseURL']
+        self.boardURL = param_ruliweb['boardURL']
 
     def run(self):
         self.driver.get(self.boardURL)

@@ -2,6 +2,7 @@ import React from "react";
 import { Grid } from "@material-ui/core";
 import "./App.css";
 import Header from "./Header";
+import Footer from "./Footer";
 import ProductCard from "./Card";
 import useScrollTrigger from "@material-ui/core/useScrollTrigger";
 import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
@@ -22,9 +23,6 @@ const useStyles = makeStyles((theme) => ({
 function ScrollTop(props) {
   const { children } = props;
   const classes = useStyles();
-  // Note that you normally won't need to set the window ref as useScrollTrigger
-  // will default to window.
-  // This is only being set here because the demo is in an iframe.
   const trigger = useScrollTrigger({
     disableHysteresis: true,
     threshold: 100,
@@ -107,6 +105,9 @@ class App extends React.Component {
                 </Grid>
               </Grid>
               <Grid item xs={1} lg={2} />
+            </Grid>            
+            <Grid item className="app__footer">
+              <Footer />
             </Grid>
           </Grid>
         )}

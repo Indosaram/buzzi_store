@@ -13,7 +13,9 @@ from exception import *
 
 class PpomppuHelper:
     def __init__(self, param_common, param_ppompu):
-        self.driver = SeleniumLoader(param_common['webdriver_path']).driver
+        selenium_loader = SeleniumLoader(param_common['webdriver_path'])
+        self.driver = selenium_loader.driver
+        self.driver_exceptions = selenium_loader.exceptions
         self.json_path = param_common['json_path']
         self.baseURL = param_ppompu['baseURL']
         self.boardURL = param_ppompu['boardURL']
