@@ -46,6 +46,7 @@ class MainCrawler:
     def _save_json(self, data):
         data_sorted = sorted(data, key=lambda x: x['date'], reverse=True)
 
+        print('📋 Converting links to deep & short links')
         for dat in data_sorted:
             deeplink = self._to_deeplink(dat['link'])
             dat['link'] = deeplink if deeplink is not None else dat['link']
@@ -66,10 +67,21 @@ class MainCrawler:
             + f"&url={quote(link, safe='')}&mode=json",
         )
 
+        shortlink = None
         res_json = res.json()
-        deeplink = res_json['url'] if res_json['result'] == 'S' else None
+        if res_json['result'] == 'S' and res_json['url'] is not None:
+            deeplink = res_json['url']
 
-        return deeplink
+            res = requests.get(
+                f"http://cutt.ly/api/api.php?"
+                + f"key={self.param_common['cuttly_api_key']}"
+                + f"&short={quote(deeplink, safe='')}"
+            )
+            res_json = res.json()['url']
+            if res_json['status'] in [1, 7]:
+                shortlink = res_json['shortLink']
+
+        return shortlink
 
     def run(self):
         prod_details = []
@@ -91,6 +103,7 @@ if __name__ == "__main__":
             'webdriver_path': webdriver_path,
             'json_path': os.path.join(os.getcwd(), 'src', 'productsData.json'),
             'linkprice_af_id': 'A100671773',
+            'cuttly_api_key': '3faf74f71d6a823ce81f910926105cea21b0d',
         },
         'ppompu': {
             'baseURL': 'http://www.ppomppu.co.kr/zboard/',
