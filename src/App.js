@@ -90,6 +90,7 @@ class App extends React.Component {
                       <ProductCard
                         key={product.id}
                         title={product.title}
+                        date={product.date}
                         hit={product.hit}
                         up={product.up}
                         price={product.price}

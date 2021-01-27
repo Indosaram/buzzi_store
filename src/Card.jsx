@@ -38,6 +38,14 @@ const useStyles = makeStyles({
     textOverflow: "ellipsis",
     margin: 0,
   },
+  date:{
+
+  },
+  date__text:{
+    fontSize: 14,
+    fontFamily: "paybooc-Medium",
+    color: "gray",
+  },
   description: {},
   description__text: {
     fontSize: 16,
@@ -89,6 +97,7 @@ const useStyles = makeStyles({
 
 function ProductCard({
   title,
+  date,
   hit,
   up,
   price,
@@ -113,12 +122,17 @@ function ProductCard({
               </Typography>
             </Box>
           </div>
+          <p className={classes.date}>
+            <Box component="div" className={classes.date__text}>
+              <Typography>{date}</Typography>
+            </Box>
+          </p>
           <p className={classes.shopInfo}>
             <Box component="span" className={classes.shopInfo__hit}>
-              {hit}
+              조회수: {hit}
             </Box>
             <Box component="span" className={classes.shopInfo__up}>
-              {up}
+              추천: {up}
             </Box>
             <Box component="span" className={classes.shopInfo__origin}>
               {origin}
@@ -160,6 +174,7 @@ function ProductCard({
 
 ProductCard.propTypes = {
   title: PropTypes.string.isRequired,
+  date: PropTypes.string.isRequired,
   hit: PropTypes.number.isRequired,
   up: PropTypes.number.isRequired,
   price: PropTypes.string.isRequired,

@@ -3,12 +3,17 @@ import json
 import platform
 
 from ppomppu_helper import PpomppuHelper
+from clien_helper import ClienHelper
+from ruliweb_helper import RuliwebHelper
 
 
 class MainCrawler:
     def __init__(self, param) -> None:
         self.param_common = param['common']
         self.param_ppompu = param['ppompu']
+        self.param_clien = param['clien']
+        self.param_ruliweb = param['ruliweb']
+        self.param_coolnjoy = param['coolnjoy']
 
     def _run_ppompu(self):
         ph = PpomppuHelper(self.param_common, self.param_ppompu)
@@ -16,8 +21,21 @@ class MainCrawler:
 
         return prod_details
 
+    def _run_clien(self):
+        ch = ClienHelper(self.param_common, self.param_clien)
+        prod_details = ch.run()
+
+        return prod_details
+
+    def _run_ruliweb(self):
+        rh = RuliwebHelper(self.param_common, self.param_ruliweb)
+        prod_details = rh.run()
+
+        return prod_details
+
     def _save_json(self, data):
-        jsondata = {"products": data}
+        data_sorted = sorted(data, key=lambda x: x['id'])
+        jsondata = {"products": data_sorted}
         with open(
             self.param_common['json_path'],
             'w',
@@ -30,6 +48,7 @@ class MainCrawler:
         prod_details = []
 
         prod_details.extend(self._run_ppompu())
+        prod_details.extend(self._run_ruliweb())
 
         self._save_json(prod_details)
 
@@ -53,6 +72,8 @@ if __name__ == "__main__":
             'baseURL': 'https://bbs.ruliweb.com/news/board/1020',
             'boardURL': 'https://bbs.ruliweb.com/news/board/1020?view_best=1',
         },
+        'clien': {},
+        'coolnjoy': {},
     }
 
     mc = MainCrawler(param)
