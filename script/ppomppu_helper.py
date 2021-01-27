@@ -34,12 +34,12 @@ class PpomppuHelper:
         print('🎁 뽐뿌')
         for idx, route in enumerate(routes):
             print(f'-> Processing {idx+1}/{len(routes)}', end='\r')
-            prod_details.append(self._get_product_data(idx, route))
-            # try:
-            #     prod_details.append(self._get_product_data(idx, route))
-            # except Exception as e:
-            #     print(e)
-            #     continue
+            # prod_details.append(self._get_product_data(idx, route))
+            try:
+                prod_details.append(self._get_product_data(idx, route))
+            except Exception as e:
+                print(e)
+                continue
         print(f'-> Processed {len(prod_details)}/{len(routes)} entries')
         self.driver.close()
 
