@@ -1,15 +1,19 @@
 import React from "react";
+import PropTypes from "prop-types";
+
 import Box from "@material-ui/core/Box";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
 import CardMedia from "@material-ui/core/CardMedia";
 import CardActions from "@material-ui/core/CardActions";
+import Snackbar from "@material-ui/core/Snackbar";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import { Typography, Link } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
+
 import ShareIcon from "@material-ui/icons/Share";
-import PropTypes from "prop-types";
+import MuiAlert from "@material-ui/lab/Alert";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
 
 const theme = createMuiTheme({
@@ -92,10 +96,12 @@ const useStyles = makeStyles({
     marginRight: 8,
     marginBottom: 8,
   },
-  prodDetail:{
-    
-  }
+  prodDetail: {},
 });
+
+function Alert(props) {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 function ProductCard({
   title,
@@ -112,6 +118,20 @@ function ProductCard({
   shop,
 }) {
   const classes = useStyles();
+  const [open, setOpen] = React.useState(false);
+
+  const handleClick = () => {
+    navigator.clipboard.writeText(link);
+    setOpen(true);
+  };
+
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") {
+      return;
+    }
+
+    setOpen(false);
+  };
 
   return (
     <MuiThemeProvider theme={theme}>
@@ -168,9 +188,18 @@ function ProductCard({
           >
             🎁 구경하기
           </Button>
-          <IconButton className={classes.shareButton} aria-label="share">
+          <IconButton
+            className={classes.shareButton}
+            aria-label="share"
+            onClick={handleClick}
+          >
             <ShareIcon />
           </IconButton>
+          <Snackbar open={open} autoHideDuration={3000} onClose={handleClose}>
+            <Alert onClose={handleClose} severity="success">
+              주소가 복사됐어요!
+            </Alert>
+          </Snackbar>
         </CardActions>
       </Card>
     </MuiThemeProvider>
