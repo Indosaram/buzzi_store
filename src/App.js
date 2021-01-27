@@ -98,6 +98,7 @@ class App extends React.Component {
                         description={product.description}
                         thumbnail={product.thumbnail}
                         link={product.link}
+                        origin_url={product.origin_url}
                         origin={product.origin}
                         shop={product.shop}
                       />

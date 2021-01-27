@@ -1,4 +1,3 @@
-from os import link
 import re
 import hashlib
 
@@ -9,6 +8,7 @@ import requests
 from bs4 import BeautifulSoup as bs
 
 from selenium_loader import SeleniumLoader
+from exception import *
 
 
 class PpomppuHelper:
@@ -33,14 +33,13 @@ class PpomppuHelper:
 
         print('🎁 뽐뿌')
         for idx, route in enumerate(routes):
-            print(f'-> Processing {idx+1}/{len(routes)}', end='\r')
-            # prod_details.append(self._get_product_data(idx, route))
+            print(f'-> Processing {idx+1}/{len(routes)}')
             try:
                 prod_details.append(self._get_product_data(idx, route))
             except Exception as e:
                 print(e)
                 continue
-        print(f'-> Processed {len(prod_details)}/{len(routes)} entries')
+        print(f'✅ Processed {len(prod_details)}/{len(routes)} entries')
         self.driver.close()
 
         return prod_details
@@ -55,14 +54,24 @@ class PpomppuHelper:
         prod_detail = {}
         prod_detail['origin'] = "뽐뿌"
 
-        # this part is little treaky, better find another approach later
-        raw_title = self.driver.find_element_by_class_name('view_title2').text
-        fragments = re.compile("\[(.+?)\]|\((.+?)\)").findall(raw_title)
-        prod_detail['shop'] = fragments[0][0]
-        prod_detail['price'], shipping = fragments[-1][1].split('/')
-        freeshipping = ['무료', '무배', '무료배송', '0']
-        if any(ele in shipping for ele in freeshipping):
-            prod_detail['shipping'] = '무료배송'
+        # this part is little tricky, better find another approach later
+        try:
+            raw_title = self.driver.find_element_by_class_name(
+                'view_title2'
+            ).text
+            fragments = re.compile("\[(.+?)\]|\((.+?)\)").findall(raw_title)
+            prod_detail['shop'] = fragments[0][0]
+            prod_detail['price'], shipping = fragments[-1][1].split('/')
+            freeshipping = ['무료', '무배', '무료배송', '0']
+            if any(ele in shipping for ele in freeshipping):
+                prod_detail['shipping'] = '무료배송'
+            else:
+                prod_detail['shipping'] = ''
+        except ValueError:
+            print('No valid price / shipping info')
+            prod_detail['shop'] = ''
+            prod_detail['price'] = ''
+            prod_detail['shipping'] = ''
 
         innerHTML = self.driver.find_element_by_class_name(
             'sub-top-text-box'
@@ -70,7 +79,9 @@ class PpomppuHelper:
         soup = bs(innerHTML, features="html.parser")
 
         prod_detail['date'] = (
-            re.compile(r'\d\d\d\d-\d\d-\d\d').search(soup.text).group()
+            re.compile(r'\d\d\d\d-\d\d-\d\d \d\d:\d\d')
+            .search(soup.text)
+            .group()
         )
         prod_detail['hit'] = (
             re.compile(r'조회수: \d+').search(soup.text).group().split(' ')[1]
@@ -89,7 +100,7 @@ class PpomppuHelper:
         ).text.split(' ')[1]
         url_parsed = urlparse(link_to_prod)
 
-        if len(url_parsed.scheme) >1 and len(url_parsed.netloc) >1:
+        if '.' in url_parsed.netloc:
             headers = {
                 "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36",
             }
@@ -102,7 +113,7 @@ class PpomppuHelper:
             else:
                 raise ConnectionError
         else:
-            raise UserWarning
+            raise NotAnUrlError(f'Invalid URL detected : {link_to_prod}')
 
         soup = bs(res.text, features="html.parser")
         prod_detail['thumbnail'] = soup.find('meta', {"property": "og:image"})[

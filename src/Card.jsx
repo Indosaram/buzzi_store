@@ -6,7 +6,7 @@ import CardMedia from "@material-ui/core/CardMedia";
 import CardActions from "@material-ui/core/CardActions";
 import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
-import { Typography } from "@material-ui/core";
+import { Typography, Link } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import ShareIcon from "@material-ui/icons/Share";
 import PropTypes from "prop-types";
@@ -33,15 +33,14 @@ const useStyles = makeStyles({
   },
   title__text: {
     fontSize: 20,
+    color: "black",
     fontFamily: "paybooc-Bold",
     fontWeight: 800,
     textOverflow: "ellipsis",
     margin: 0,
   },
-  date:{
-
-  },
-  date__text:{
+  date: {},
+  date__text: {
     fontSize: 14,
     fontFamily: "paybooc-Medium",
     color: "gray",
@@ -105,6 +104,7 @@ function ProductCard({
   description,
   thumbnail,
   link,
+  origin_url,
   origin,
   shop,
 }) {
@@ -118,7 +118,9 @@ function ProductCard({
           <div className={classes.title} href={link}>
             <Box component="div">
               <Typography noWrap className={classes.title__text}>
-                {title}
+                <Link target="_blank" href={origin_url}>
+                  {title}
+                </Link>
               </Typography>
             </Box>
           </div>
@@ -182,6 +184,7 @@ ProductCard.propTypes = {
   description: PropTypes.string.isRequired,
   thumbnail: PropTypes.string.isRequired,
   link: PropTypes.string.isRequired,
+  origin_url: PropTypes.string.isRequired,
   origin: PropTypes.string.isRequired,
   shop: PropTypes.string.isRequired,
 };

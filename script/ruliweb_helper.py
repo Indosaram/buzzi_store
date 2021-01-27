@@ -9,11 +9,14 @@ import requests
 from bs4 import BeautifulSoup as bs
 
 from selenium_loader import SeleniumLoader
+from exception import *
 
 
 class RuliwebHelper:
     def __init__(self, param_common, param_clien):
-        self.driver = SeleniumLoader(param_common['webdriver_path']).driver
+        selenium_loader = SeleniumLoader(param_common['webdriver_path'])
+        self.driver = selenium_loader.driver
+        self.driver_exceptions = selenium_loader.exceptions
         self.json_path = param_common['json_path']
         self.baseURL = param_clien['baseURL']
         self.boardURL = param_clien['boardURL']
@@ -27,15 +30,14 @@ class RuliwebHelper:
             entry = self.driver.find_element_by_xpath(
                 f'//*[@id="board_list"]/div/div[2]/table/tbody/tr[{idx}]'
             )
-            shop = (
-                self.driver.find_element_by_xpath(
-                    '//*[@id="board_list"]/div/div[2]/table/tbody/tr[7]/td[3]/div/a[1]/a'
-                )
-                .text.replace('[', '')
-                .replace(']', '')
-            )
-            if shop == '품절':
-                raise KeyError
+            try:
+                shop = self.driver.find_element_by_xpath(
+                    f'//*[@id="board_list"]/div/div[2]/table/tbody/tr[{idx}]/td[3]/div/a[1]/a'
+                ).text[1:-1]
+                if shop == '품절':
+                    continue
+            except self.driver_exceptions.NoSuchElementException:
+                shop = ''
 
             # Get product details
             prod_detail = {}
@@ -52,28 +54,21 @@ class RuliwebHelper:
             prod_detail['up'] = soup.select_one(
                 "td[class='recomd']"
             ).text.replace('\n', '')
-            upload_time = (
-                soup.select_one("td[class='time']")
-                .text.replace('\n', '')
-                .replace(' ', '')
-            )
-
-            if ':' in upload_time:
-                prod_detail['date'] = datetime.now().strftime('%Y-%m-%d')
-            prod_detail['date'] = upload_time.replace('.', '-')
 
             pre_prod_details.append(prod_detail)
 
         prod_details = []
         for idx, prod_detail in enumerate(pre_prod_details):
-            print(f'-> Processing {idx+1}/28', end='\r')
+            print(f'-> Processing {idx+1}/{len(pre_prod_details)}')
             try:
                 prod_details.append(self._get_product_data(prod_detail))
             except Exception as e:
                 print(e)
                 continue
 
-        print(f'-> Processed {len(prod_details)}/28 entries')
+        print(
+            f'✅ Processed {len(prod_details)}/{len(pre_prod_details)} entries'
+        )
         self.driver.close()
 
         return prod_details
@@ -92,37 +87,54 @@ class RuliwebHelper:
             "/html/head/meta[@property='og:description']"
         ).get_attribute('content')
 
+        date_string = self.driver.find_element_by_class_name('regdate').text
+        date_obj = datetime.strptime(date_string, "%Y.%m.%d (%H:%M:%S)")
+        prod_detail['date'] = datetime.strftime(date_obj, '%Y-%m-%d %H:%M')
+
         price = re.compile(r"\d{3,}(,\d{1,3})?원").search(raw_title)
         prod_detail['price'] = price.group() if price is not None else price
 
         freeshipping = ['무료', '무배', '무료배송']
         if any(ele in raw_title for ele in freeshipping):
             prod_detail['shipping'] = '무료배송'
+        else:
+            prod_detail['shipping'] = ''
 
         # Parse prod page's metadata
-        link_to_prod = self.driver.find_element_by_class_name(
-            'source_url'
-        ).text.split(' ')[-1]
-
-        headers = {
-            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36",
-        }
         try:
-            res = requests.get(link_to_prod, headers=headers)
-        except Exception as e:
-            raise e
-        if res.reason == 'OK':
-            prod_detail['link'] = res.url
+            webelement = self.driver.find_element_by_class_name('source_url')
+        except:
+            raise NoUrlExistError('No product URL exsits')
+        link_to_prod = webelement.text.split(' ')[-1]
+        url_parsed = urlparse(link_to_prod)
+
+        if '.' in url_parsed.netloc:
+            headers = {
+                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36",
+            }
+            try:
+                res = requests.get(link_to_prod, headers=headers)
+            except Exception as e:
+                raise e
+            if res.reason == 'OK':
+                prod_detail['link'] = res.url
+            else:
+                raise ConnectionError
         else:
-            raise ConnectionError
+            raise NotAnUrlError(f'Invalid URL detected : {link_to_prod}')
 
         soup = bs(res.text, features="html.parser")
-        prod_detail['thumbnail'] = soup.select_one("meta[property='og:image']")[
-            'content'
-        ]
-        prod_detail['title'] = soup.find('title').text
-        prod_detail['id'] = hashlib.sha1(
-            prod_detail['title'].encode()
-        ).hexdigest()
+        try:
+            prod_detail['thumbnail'] = soup.select_one(
+                "meta[property='og:image']"
+            )['content']
+            prod_detail['title'] = soup.find('title').text
+            prod_detail['id'] = hashlib.sha1(
+                prod_detail['title'].encode()
+            ).hexdigest()
+        except:
+            raise InvalidMetadataError(
+                'This website does not provide valid meta tags.'
+            )
 
         return prod_detail

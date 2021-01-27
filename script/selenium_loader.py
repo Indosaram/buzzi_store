@@ -1,7 +1,7 @@
 import os
 
 from selenium import webdriver
-
+from selenium.common import exceptions
 
 class SeleniumLoader:
     def __init__(self, webdriverpath):
@@ -20,7 +20,7 @@ class SeleniumLoader:
         options.add_experimental_option('excludeSwitches', ['enable-logging'])
 
         self.driver = webdriver.Chrome(webdriverpath, options=options)
-
+        self.exceptions = exceptions
 
 if __name__ == '__main__':
     dir_selenium = 'C:\\chromedriver\\'
