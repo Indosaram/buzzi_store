@@ -67,19 +67,23 @@ class MainCrawler:
             + f"&url={quote(link, safe='')}&mode=json",
         )
 
-        shortlink = None
+        deeplink = None
         res_json = res.json()
         if res_json['result'] == 'S' and res_json['url'] is not None:
             deeplink = res_json['url']
+        else:
+            deeplink = link
 
-            res = requests.get(
-                f"http://cutt.ly/api/api.php?"
-                + f"key={self.param_common['cuttly_api_key']}"
-                + f"&short={quote(deeplink, safe='')}"
-            )
-            res_json = res.json()['url']
-            if res_json['status'] in [1, 7]:
-                shortlink = res_json['shortLink']
+        res = requests.get(
+            f"http://cutt.ly/api/api.php?"
+            + f"key={self.param_common['cuttly_api_key']}"
+            + f"&short={quote(deeplink, safe='')}"
+        )
+        res_json = res.json()['url']
+        if res_json['status'] in [1, 7]:
+            shortlink = res_json['shortLink']
+        else:
+            shortlink = deeplink
 
         return shortlink
 
