@@ -2,9 +2,11 @@ import os
 import json
 import platform
 from urllib.parse import quote
+from urllib.request import urlretrieve
 
 import requests
 
+from cloudinary_helper import CloudinaryHelper
 from ppomppu_helper import PpomppuHelper
 from clien_helper import ClienHelper
 from ruliweb_helper import RuliwebHelper
@@ -18,6 +20,14 @@ class MainCrawler:
         self.param_clien = param['clien']
         self.param_ruliweb = param['ruliweb']
         self.param_coolnjoy = param['coolenjoy']
+
+        cloudinary_param = {
+            'cloud_name': param['common']['cloudinary_name'],
+            'api_key': param['common']['cloudinary_api_key'],
+            'api_secret': param['common']['cloudinary_api_secret'],
+        }
+        self.cloudinary_helper = CloudinaryHelper(cloudinary_param)
+        self._download_json()
 
     def _run_ppompu(self):
         ph = PpomppuHelper(self.param_common, self.param_ppompu)
@@ -44,20 +54,37 @@ class MainCrawler:
         return prod_details
 
     def _save_json(self, data):
-        data_sorted = sorted(data, key=lambda x: x['date'], reverse=True)
+        if not os.path.exists(self.param_common['json_path']):
+            with open(self.param_common['json_path'], 'w'):
+                pass
+
+        f = open(
+            self.param_common['json_path'],
+            'r+',
+            encoding='utf-8',
+        )
+
+        products = json.load(f)['products']
+        ids = [prod['id'] for prod in products]
 
         print('📋 Converting links to deep & short links')
-        for dat in data_sorted:
-            deeplink = self._to_deeplink(dat['link'])
-            dat['link'] = deeplink if deeplink is not None else dat['link']
+        for entry in data:
+            if entry['id'] not in ids:
+                # deeplink = self._to_deeplink(entry['link'])
+                # entry['link'] = (
+                #     deeplink if deeplink is not None else entry['link']
+                # )
+                products.append(entry)
 
-        jsondata = {"products": data_sorted}
+        data_sorted = sorted(products, key=lambda x: x['date'], reverse=True)
+        jsondata = {"products": data_sorted[:1000]}
         with open(
             self.param_common['json_path'],
             'w',
             encoding='utf-8',
         ) as f:
             json.dump(jsondata, f, ensure_ascii=False, indent=4)
+        self._upload_json()
         print('Finish saving .json')
 
     def _to_deeplink(self, link):
@@ -95,6 +122,13 @@ class MainCrawler:
 
         self._save_json(prod_details)
 
+    def _download_json(self):
+        url = self.cloudinary_helper._get_url('productsData.json')
+        urlretrieve(url, self.param_common['json_path'])
+
+    def _upload_json(self):
+        self.cloudinary_helper.upload_file(self.param_common['json_path'])
+
 
 if __name__ == "__main__":
     if platform.system() == 'Windows':
@@ -106,8 +140,11 @@ if __name__ == "__main__":
         'common': {
             'webdriver_path': webdriver_path,
             'json_path': os.path.join(os.getcwd(), 'src', 'productsData.json'),
-            'linkprice_af_id': 'A100671773',
-            'cuttly_api_key': '3faf74f71d6a823ce81f910926105cea21b0d',
+            'linkprice_af_id': os.getenv('LINKPRICE_AF_ID'),
+            'cuttly_api_key': os.getenv('CUTTLY_API_KEY'),
+            'cloudinary_name': os.getenv('CLOUDINARY_NAME'),
+            'cloudinary_api_key': os.getenv('CLOUDINARY_API_KEY'),
+            'cloudinary_api_secret': os.getenv('CLOUDINARY_API_SECRET'),
         },
         'ppompu': {
             'baseURL': 'http://www.ppomppu.co.kr/zboard/',

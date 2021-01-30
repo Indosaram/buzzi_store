@@ -1,15 +1,11 @@
-import hashlib
 import re
 from datetime import datetime
-
-from urllib.parse import urlparse
-
-import requests
 
 from bs4 import BeautifulSoup as bs
 
 from selenium_loader import SeleniumLoader
 from exception import *
+from helper_common import meta_from_prod_detail_page
 
 
 class RuliwebHelper:
@@ -54,6 +50,7 @@ class RuliwebHelper:
             prod_detail['up'] = soup.select_one(
                 "td[class='recomd']"
             ).text.replace('\n', '')
+            prod_detail['category'] = soup.select_one("td[class='divsn']").text
 
             pre_prod_details.append(prod_detail)
 
@@ -106,35 +103,12 @@ class RuliwebHelper:
         except:
             raise NoUrlExistError('No product URL exsits')
         link_to_prod = webelement.text.split(' ')[-1]
-        url_parsed = urlparse(link_to_prod)
 
-        if '.' in url_parsed.netloc:
-            headers = {
-                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36",
-            }
-            try:
-                res = requests.get(link_to_prod, headers=headers)
-            except Exception as e:
-                raise e
-            if res.reason == 'OK':
-                prod_detail['link'] = res.url
-            else:
-                raise ConnectionError
-        else:
-            raise NotAnUrlError(f'Invalid URL detected : {link_to_prod}')
-
-        soup = bs(res.text, features="html.parser")
-        try:
-            prod_detail['thumbnail'] = soup.select_one(
-                "meta[property='og:image']"
-            )['content']
-            prod_detail['title'] = soup.find('title').text
-            prod_detail['id'] = hashlib.sha1(
-                prod_detail['title'].encode()
-            ).hexdigest()
-        except:
-            raise InvalidMetadataError(
-                'This website does not provide valid meta tags.'
-            )
+        (
+            prod_detail['link'],
+            prod_detail['thumbnail'],
+            prod_detail['title'],
+            prod_detail['id'],
+        ) = meta_from_prod_detail_page(link_to_prod)
 
         return prod_detail

@@ -1,14 +1,10 @@
 import re
-import hashlib
-
-from urllib.parse import urlparse
-
-import requests
 
 from bs4 import BeautifulSoup as bs
 
 from selenium_loader import SeleniumLoader
 from exception import *
+from helper_common import meta_from_prod_detail_page
 
 
 class PpomppuHelper:
@@ -91,42 +87,27 @@ class PpomppuHelper:
         prod_detail['up'] = (
             re.compile(r'추천수: \d+').search(soup.text).group().split(' ')[1]
         )
+        prod_detail['category'] = (
+            re.compile(r'분류: \w+').search(soup.text).group()
+        )
 
         prod_detail['origin_url'] = self.driver.find_element_by_xpath(
             "/html/head/meta[@property='og:url']"
+        ).get_attribute('content')
+        prod_detail['description'] = self.driver.find_element_by_xpath(
+            "/html/head/meta[@property='og:description']"
         ).get_attribute('content')
 
         # Parse prod page's metadata
         link_to_prod = self.driver.find_element_by_class_name(
             'wordfix'
         ).text.split(' ')[1]
-        url_parsed = urlparse(link_to_prod)
 
-        if '.' in url_parsed.netloc:
-            headers = {
-                "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36",
-            }
-            try:
-                res = requests.get(link_to_prod, headers=headers)
-            except Exception as e:
-                raise e
-            if res.reason == 'OK':
-                prod_detail['link'] = res.url
-            else:
-                raise ConnectionError
-        else:
-            raise NotAnUrlError(f'Invalid URL detected : {link_to_prod}')
-
-        soup = bs(res.text, features="html.parser")
-        prod_detail['thumbnail'] = soup.find('meta', {"property": "og:image"})[
-            'content'
-        ]
-        prod_detail['description'] = soup.find(
-            'meta', {"property": "og:description"}
-        )['content']
-        prod_detail['title'] = soup.find('title').text
-        prod_detail['id'] = hashlib.sha1(
-            prod_detail['title'].encode()
-        ).hexdigest()
+        (
+            prod_detail['link'],
+            prod_detail['thumbnail'],
+            prod_detail['title'],
+            prod_detail['id'],
+        ) = meta_from_prod_detail_page(link_to_prod)
 
         return prod_detail
