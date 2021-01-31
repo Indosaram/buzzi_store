@@ -36,6 +36,12 @@ jobs:
             ${{ runner.OS }}-
 
       - name: Install and Build 🔧 # This example project is built using npm and outputs the result to the 'build' folder. Replace with the commands required to build your project, or remove this step entirely if your site is pre-built.
+          env:
+            LINKPRICE_AF_ID: ${{ secrets.LINKPRICE_AF_ID }}
+            CUTTLY_API_KEY: ${{ secrets.CUTTLY_API_KEY }}
+            CLOUDINARY_NAME: ${{ secrets.CLOUDINARY_NAME }}
+            CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
+            CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
         run: |
           sudo chmod 755 ./script/chromedriver
           pipenv install
