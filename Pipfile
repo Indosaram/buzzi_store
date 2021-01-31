@@ -7,6 +7,7 @@ name = "pypi"
 bs4 = "*"
 selenium = "*"
 requests = "*"
+cloudinary = "*"
 
 [dev-packages]
 
