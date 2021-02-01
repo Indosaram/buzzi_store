@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import PropTypes from "prop-types";
 
 import { AppBar, Toolbar } from "@material-ui/core";
@@ -21,9 +21,7 @@ import buzziLogo from "./buzzi-store-logo.png";
 import CategoryListMenu from "./Category";
 
 const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-  },
+  root: {},
   header: {
     backgroundColor: "white",
     height: 60,
@@ -32,13 +30,19 @@ const useStyles = makeStyles((theme) => ({
   header__toolbar: {
     padding: 0,
   },
+  logo_container: {
+    flexGrow: 1,
+  },
   logo: {
     maxWidth: 120,
+    display: "block",
   },
   header__menuButton: {
     color: "#FE6B8B",
   },
-  header__category: {},
+  header__category: {
+    marginLeft: "auto",
+  },
   list: {
     width: 250,
   },
@@ -56,7 +60,6 @@ const Header = ({ category, onChangeValue }) => {
   const [state, setState] = React.useState({
     left: false,
   });
-
 
   const toggleDrawer = (open) => (event) => {
     if (
@@ -116,6 +119,8 @@ const Header = ({ category, onChangeValue }) => {
     </div>
   );
 
+  const current_route = useLocation().pathname;
+
   return (
     <React.Fragment>
       <div className={classes.root}>
@@ -140,18 +145,22 @@ const Header = ({ category, onChangeValue }) => {
             >
               {list}
             </Drawer>
-            <a href="/">
-              <img
-                className={classes.logo}
-                src={buzziLogo}
-                alt="Buzzi store logo"
+            <div className={classes.logo_container}>
+              <a href="/">
+                <img
+                  className={classes.logo}
+                  src={buzziLogo}
+                  alt="Buzzi store logo"
+                />
+              </a>
+            </div>
+            {current_route === "/" ? (
+              <CategoryListMenu
+                set_category={category}
+                onChange={onChangeValue}
+                className={classes.header__category}
               />
-            </a>
-            <CategoryListMenu
-              set_category={category}
-              onChange={onChangeValue}
-              className={classes.header__category}
-            />
+            ) : null}
           </Toolbar>
         </AppBar>
       </div>

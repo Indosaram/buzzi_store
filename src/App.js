@@ -12,7 +12,7 @@ import Header from "./Header";
 class App extends React.Component {
   state = {
     isLoading: true,
-    category: "식품/건강",
+    category: "전체보기",
   };
 
   getProducts = () => {

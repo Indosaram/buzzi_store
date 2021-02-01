@@ -80,6 +80,7 @@ const useStyles = makeStyles({
     marginRight: 5,
     padding: 5,
     borderRadius: 3,
+    color: "black",
   },
   shopInfo__shop: {
     backgroundColor: "#FF8E53",
@@ -147,17 +148,15 @@ function ProductCard({
 
   return (
     <MuiThemeProvider theme={theme}>
-      <Card className={{ root: classes.card }} elevation="10">
+      <Card className={{ root: classes.card }} elevation={10}>
         <CardMedia className={classes.media} image={thumbnail} title={title} />
         <CardContent>
-          <div className={classes.title} href={link}>
-            <Box component="div">
-              <Typography className={classes.title__text}>
-                <Link target="_blank" href={origin_url}>
-                  {title}
-                </Link>
-              </Typography>
-            </Box>
+          <div className={classes.title}>
+            <Link target="_blank" href={link}>
+              <Box component="div">
+                <Typography className={classes.title__text}>{title}</Typography>
+              </Box>
+            </Link>
           </div>
           <div className={classes.date}>
             <Box component="div">
@@ -175,9 +174,11 @@ function ProductCard({
             </Box>
           </div>
           <div className={classes.shopInfo}>
-            <Box component="span" className={classes.shopInfo__origin}>
-              {origin}
-            </Box>
+            <Link target="_blank" href={origin_url}>
+              <Box component="span" className={classes.shopInfo__origin}>
+                {origin}
+              </Box>
+            </Link>
             <Box component="span" className={classes.shopInfo__shop}>
               {shop}
             </Box>
@@ -229,8 +230,14 @@ ProductCard.propTypes = {
   date: PropTypes.string.isRequired,
   hit: PropTypes.string.isRequired,
   up: PropTypes.string.isRequired,
-  price: PropTypes.string.isRequired,
-  shipping: PropTypes.string.isRequired,
+  price: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.object,
+  ]),
+  shipping: PropTypes.oneOfType([
+    PropTypes.string,
+    PropTypes.object,
+  ]),
   description: PropTypes.string.isRequired,
   thumbnail: PropTypes.string.isRequired,
   link: PropTypes.string.isRequired,

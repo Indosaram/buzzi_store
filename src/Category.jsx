@@ -1,12 +1,13 @@
 import React from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
-import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
+import { Typography } from "@material-ui/core";
 
 const options = [
+  "전체보기",
   "기타",
   "컴퓨터",
   "게임/디지털",
@@ -25,6 +26,9 @@ const useStyles = makeStyles((theme) => ({
   formControl: {
     margin: theme.spacing(1),
     minWidth: 120,
+  },
+  formControl__text: {
+    fontFamily: "paybooc-Medium",
   },
 }));
 
@@ -49,7 +53,6 @@ export default function CategoryListMenu({ set_category, onChange }) {
   return (
     <div>
       <FormControl className={classes.formControl}>
-        <InputLabel id="demo-controlled-open-select-label">Category</InputLabel>
         <Select
           labelId="demo-controlled-open-select-label"
           id="demo-controlled-open-select"
@@ -59,8 +62,14 @@ export default function CategoryListMenu({ set_category, onChange }) {
           value={category}
           onChange={handleChange}
         >
-          {options.map((option) => {
-            return <MenuItem value={option}>{option}</MenuItem>;
+          {options.map((option, index) => {
+            return (
+              <MenuItem key={index} value={option}>
+                <Typography className={classes.formControl__text}>
+                  {option}
+                </Typography>
+              </MenuItem>
+            );
           })}
         </Select>
       </FormControl>
