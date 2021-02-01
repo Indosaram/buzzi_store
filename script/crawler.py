@@ -55,9 +55,9 @@ class MainCrawler:
 
     def _save_json(self, data):
         print('📋 Converting links to deep & short links')
-        # for entry in data:
-        #     deeplink = self._to_deeplink(entry['link'])
-        #     entry['link'] = deeplink if deeplink is not None else entry['link']
+        for entry in data:
+            deeplink = self._to_deeplink(entry['link'])
+            entry['link'] = deeplink if deeplink is not None else entry['link']
 
         data_sorted = sorted(data, key=lambda x: x['date'], reverse=True)
         jsondata = {"products": data_sorted[:1000]}
@@ -67,7 +67,7 @@ class MainCrawler:
             encoding='utf-8',
         ) as f:
             json.dump(jsondata, f, ensure_ascii=False, indent=4)
-        # self._upload_json()
+        self._upload_json()
         print('Finish saving .json')
 
     def _to_deeplink(self, link):
