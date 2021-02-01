@@ -94,9 +94,8 @@ class RuliwebHelper:
         date_string = self.driver.find_element_by_class_name('regdate').text
         date_obj = datetime.strptime(date_string, "%Y.%m.%d (%H:%M:%S)")
         prod_detail['date'] = datetime.strftime(date_obj, '%Y-%m-%d %H:%M')
-
-        price = re.compile(r"\d{3,}(,\d{1,3})?원").search(raw_title)
-        prod_detail['price'] = price.group() if price is not None else price
+        
+        prod_detail['price'] = price_regex(raw_title)
 
         freeshipping = ['무료', '무배', '무료배송']
         if any(ele in raw_title for ele in freeshipping):

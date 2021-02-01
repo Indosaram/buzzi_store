@@ -62,30 +62,7 @@ const Home = ({ category }) => {
       <Grid item xs={12} sm={8}>
         <Grid container spacing={1}>
           {products.map((product) => {
-            if (product.category === category) {
-              return (
-                <Grid item xs={6} md={4}>
-                  <LazyLoad key={product.id} placeholder={<Loading />}>
-                    <ProductCard
-                      key={product.id}
-                      title={product.title}
-                      date={product.date}
-                      hit={product.hit}
-                      up={product.up}
-                      price={product.price}
-                      shipping={product.shipping}
-                      description={product.description}
-                      thumbnail={product.thumbnail}
-                      link={product.link}
-                      origin_url={product.origin_url}
-                      origin={product.origin}
-                      shop={product.shop}
-                    />
-                  </LazyLoad>
-                </Grid>
-              );
-            }
-            if (category === "전체보기") {
+            if (product.category === category || category === "전체보기") {
               return (
                 <Grid item xs={6} md={4}>
                   <LazyLoad key={product.id} placeholder={<Loading />}>
