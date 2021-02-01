@@ -4,7 +4,7 @@ from bs4 import BeautifulSoup as bs
 
 from selenium_loader import SeleniumLoader
 from exception import *
-from helper_common import meta_from_prod_detail_page
+from helper_common import *
 
 
 class PpomppuHelper:
@@ -87,9 +87,10 @@ class PpomppuHelper:
         prod_detail['up'] = (
             re.compile(r'추천수: \d+').search(soup.text).group().split(' ')[1]
         )
-        prod_detail['category'] = (
+        pre_category = (
             re.compile(r'분류: \w+').search(soup.text).group()
-        )
+        ).split(' ')[1]
+        prod_detail['category'] = category_manager(pre_category)
 
         prod_detail['origin_url'] = self.driver.find_element_by_xpath(
             "/html/head/meta[@property='og:url']"

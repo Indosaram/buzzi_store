@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-
 import Box from "@material-ui/core/Box";
 import Card from "@material-ui/core/Card";
 import CardContent from "@material-ui/core/CardContent";
@@ -11,7 +10,6 @@ import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
 import { Typography, Link } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-
 import ShareIcon from "@material-ui/icons/Share";
 import MuiAlert from "@material-ui/lab/Alert";
 import { MuiThemeProvider, createMuiTheme } from "@material-ui/core/styles";
@@ -75,7 +73,7 @@ const useStyles = makeStyles({
     fontSize: 12,
     fontFamily: "paybooc-Medium",
     margin: "10px auto",
-    height: 15
+    height: 15,
   },
   shopInfo__origin: {
     backgroundColor: "#FE6B8B",

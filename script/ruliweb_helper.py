@@ -5,7 +5,7 @@ from bs4 import BeautifulSoup as bs
 
 from selenium_loader import SeleniumLoader
 from exception import *
-from helper_common import meta_from_prod_detail_page
+from helper_common import *
 
 
 class RuliwebHelper:
@@ -50,7 +50,10 @@ class RuliwebHelper:
             prod_detail['up'] = soup.select_one(
                 "td[class='recomd']"
             ).text.replace('\n', '')
-            prod_detail['category'] = soup.select_one("td[class='divsn']").text
+            pre_category = soup.select_one(
+                "td[class='divsn']"
+            ).text.replace('\n', '')
+            prod_detail['category'] = category_manager(pre_category)
 
             pre_prod_details.append(prod_detail)
 
@@ -80,9 +83,13 @@ class RuliwebHelper:
             .split('|')[0]
         )
 
-        prod_detail['description'] = self.driver.find_element_by_xpath(
-            "/html/head/meta[@property='og:description']"
-        ).get_attribute('content')
+        prod_detail['description'] = (
+            self.driver.find_element_by_xpath(
+                "/html/head/meta[@property='og:description']"
+            )
+            .get_attribute('content')
+            .strip()
+        )
 
         date_string = self.driver.find_element_by_class_name('regdate').text
         date_obj = datetime.strptime(date_string, "%Y.%m.%d (%H:%M:%S)")

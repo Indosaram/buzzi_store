@@ -54,29 +54,12 @@ class MainCrawler:
         return prod_details
 
     def _save_json(self, data):
-        if not os.path.exists(self.param_common['json_path']):
-            with open(self.param_common['json_path'], 'w'):
-                pass
-
-        f = open(
-            self.param_common['json_path'],
-            'r+',
-            encoding='utf-8',
-        )
-
-        products = json.load(f)['products']
-        ids = [prod['id'] for prod in products]
-
         print('📋 Converting links to deep & short links')
-        for entry in data:
-            if entry['id'] not in ids:
-                # deeplink = self._to_deeplink(entry['link'])
-                # entry['link'] = (
-                #     deeplink if deeplink is not None else entry['link']
-                # )
-                products.append(entry)
+        # for entry in data:
+        #     deeplink = self._to_deeplink(entry['link'])
+        #     entry['link'] = deeplink if deeplink is not None else entry['link']
 
-        data_sorted = sorted(products, key=lambda x: x['date'], reverse=True)
+        data_sorted = sorted(data, key=lambda x: x['date'], reverse=True)
         jsondata = {"products": data_sorted[:1000]}
         with open(
             self.param_common['json_path'],
@@ -84,7 +67,7 @@ class MainCrawler:
             encoding='utf-8',
         ) as f:
             json.dump(jsondata, f, ensure_ascii=False, indent=4)
-        self._upload_json()
+        # self._upload_json()
         print('Finish saving .json')
 
     def _to_deeplink(self, link):

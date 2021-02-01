@@ -1,83 +1,38 @@
 import React from "react";
 import { Grid } from "@material-ui/core";
+import { BrowserRouter, Route, Switch } from "react-router-dom";
+
 import "./App.css";
+import Home from "./Home";
+import Contact from "./Contact";
+import About from "./About";
+import Disclaimer from "./Disclaimer";
 import Header from "./Header";
-import Footer from "./Footer";
-import ProductCard from "./Card";
-import useScrollTrigger from "@material-ui/core/useScrollTrigger";
-import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
-import PropTypes from "prop-types";
-import Fab from "@material-ui/core/Fab";
-import Zoom from "@material-ui/core/Zoom";
-import { makeStyles } from "@material-ui/core/styles";
-import productsData from "./productsData.json";
-import LazyLoad from "react-lazyload";
-
-const useStyles = makeStyles((theme) => ({
-  root: {
-    position: "fixed",
-    bottom: theme.spacing(2),
-    right: theme.spacing(2),
-  },
-}));
-
-function ScrollTop(props) {
-  const { children } = props;
-  const classes = useStyles();
-  const trigger = useScrollTrigger({
-    disableHysteresis: true,
-    threshold: 100,
-  });
-
-  const handleClick = (event) => {
-    const anchor = (event.target.ownerDocument || document).querySelector(
-      "#back-to-top-anchor"
-    );
-
-    if (anchor) {
-      anchor.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  };
-
-  return (
-    <Zoom in={trigger}>
-      <div onClick={handleClick} role="presentation" className={classes.root}>
-        {children}
-      </div>
-    </Zoom>
-  );
-}
-
-const Loading = () => <div className="loading">Loading...</div>;
-
-ScrollTop.propTypes = {
-  children: PropTypes.element.isRequired,
-};
 
 class App extends React.Component {
   state = {
     isLoading: true,
-    products: [],
+    category: "식품/건강",
   };
 
   getProducts = () => {
-    const { products } = productsData;
-    this.setState({ products, isLoading: false });
+    this.setState({ isLoading: false });
   };
 
   async componentDidMount() {
     this.getProducts();
   }
 
+  onChangeCategory = (value) => {
+    this.setState({ category: value });
+  };
+
   render() {
-    const { isLoading, products } = this.state;
+    const { isLoading, category } = this.state;
+
     return (
-      <section className="container">
-        {isLoading ? (
-          <div className="loader">
-            <span className="loader__text">Loading...</span>
-          </div>
-        ) : (
+      <BrowserRouter>
+        <section className="container">
           <Grid
             container
             direction="column"
@@ -85,49 +40,42 @@ class App extends React.Component {
             style={{ padding: "0 10px 10px" }}
           >
             <Grid item className="app__header">
-              <Header />
+              <Header
+                category={category}
+                onChangeValue={this.onChangeCategory}
+              />
             </Grid>
-            <Grid item container className="app__cards">
-              <Grid item xs={0} sm={2} />
-              <Grid item xs={12} sm={8}>
-                <Grid container spacing={1}>
-                  {products.map((product) => (
-                    <Grid item xs={6} md={4}>
-                      <LazyLoad key={product.id} placeholder={<Loading />}>
-                        <ProductCard
-                          key={product.id}
-                          title={product.title}
-                          date={product.date}
-                          hit={product.hit}
-                          up={product.up}
-                          price={product.price}
-                          shipping={product.shipping}
-                          description={product.description}
-                          thumbnail={product.thumbnail}
-                          link={product.link}
-                          origin_url={product.origin_url}
-                          origin={product.origin}
-                          shop={product.shop}
-                        />
-                      </LazyLoad>
-                    </Grid>
-                  ))}
-                </Grid>
-              </Grid>
-              <Grid item xs={0} sm={2} />
-            </Grid>
-            <Grid item className="app__footer">
-              <Footer />
-            </Grid>
+            {isLoading ? (
+              <div className="loader">
+                <span className="loader__text">Loading...</span>
+              </div>
+            ) : (
+              <Switch>
+                <Route
+                  exact
+                  path="/"
+                  render={() => <Home category={category} />}
+                />
+                <Route
+                  exact
+                  path="/about"
+                  render={(props) => <About {...props} />}
+                />
+                <Route
+                  exact
+                  path="/contact"
+                  render={(props) => <Contact {...props} />}
+                />
+                <Route
+                  exact
+                  path="/disclaimer"
+                  render={(props) => <Disclaimer {...props} />}
+                />
+              </Switch>
+            )}
           </Grid>
-        )}
-
-        <ScrollTop>
-          <Fab color="secondary" size="small" aria-label="scroll back to top">
-            <KeyboardArrowUpIcon />
-          </Fab>
-        </ScrollTop>
-      </section>
+        </section>
+      </BrowserRouter>
     );
   }
 }
