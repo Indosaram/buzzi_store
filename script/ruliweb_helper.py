@@ -22,7 +22,7 @@ class RuliwebHelper:
 
         print('🎁 루리웹')
         pre_prod_details = []
-        for idx in range(7, 35):
+        for idx in range(1, 35):
             entry = self.driver.find_element_by_xpath(
                 f'//*[@id="board_list"]/div/div[2]/table/tbody/tr[{idx}]'
             )
@@ -41,6 +41,13 @@ class RuliwebHelper:
             prod_detail['shop'] = shop
 
             soup = bs(entry.get_attribute('innerHTML'), features="html.parser")
+            pre_category = soup.select_one("td[class='divsn']").text.replace(
+                '\n', ''
+            )
+            category = category_manager(pre_category)
+            if category is None:
+                continue
+            prod_detail['category'] = category
             prod_detail['origin_url'] = soup.select_one("a[class = 'deco']")[
                 'href'
             ]
@@ -50,10 +57,6 @@ class RuliwebHelper:
             prod_detail['up'] = soup.select_one(
                 "td[class='recomd']"
             ).text.replace('\n', '')
-            pre_category = soup.select_one(
-                "td[class='divsn']"
-            ).text.replace('\n', '')
-            prod_detail['category'] = category_manager(pre_category)
 
             pre_prod_details.append(prod_detail)
 
@@ -94,7 +97,7 @@ class RuliwebHelper:
         date_string = self.driver.find_element_by_class_name('regdate').text
         date_obj = datetime.strptime(date_string, "%Y.%m.%d (%H:%M:%S)")
         prod_detail['date'] = datetime.strftime(date_obj, '%Y-%m-%d %H:%M')
-        
+
         prod_detail['price'] = price_regex(raw_title)
 
         freeshipping = ['무료', '무배', '무료배송']

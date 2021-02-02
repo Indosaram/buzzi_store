@@ -123,8 +123,10 @@ def category_manager(category):
             '취미/레저',
         ),
     }
-
-    return categories[category]
+    if category in categories.keys():
+        return categories[category]
+    else:
+        return None
 
 
 def price_regex(string):
