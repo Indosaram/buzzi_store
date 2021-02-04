@@ -55,11 +55,30 @@ class MainCrawler:
 
     def _save_json(self, data):
         print('📋 Converting links to deep & short links')
+
+        data_old = json.load(
+            open(
+                self.param_common['json_path'],
+                'r',
+                encoding='utf-8',
+            )
+        )['products']
+
+        data_ids = [entry['id'] for entry in data_old]
+
+        data_final = []
         for entry in data:
             deeplink = self._to_deeplink(entry['link'])
             entry['link'] = deeplink if deeplink is not None else entry['link']
 
-        data_sorted = sorted(data, key=lambda x: x['date'], reverse=True)
+            if entry['id'] in data_ids:
+                data_old[data_ids.index(entry['id'])] = entry
+            else:
+                data_final.append(entry)
+
+        data_final.extend(data_old)
+
+        data_sorted = sorted(data_final, key=lambda x: x['date'], reverse=True)
         jsondata = {"products": data_sorted[:1000]}
         with open(
             self.param_common['json_path'],
@@ -67,7 +86,7 @@ class MainCrawler:
             encoding='utf-8',
         ) as f:
             json.dump(jsondata, f, ensure_ascii=False, indent=4)
-        self._upload_json()
+        # self._upload_json()
         print('Finish saving .json')
 
     def _to_deeplink(self, link):
@@ -100,7 +119,7 @@ class MainCrawler:
     def run(self):
         prod_details = []
 
-        prod_details.extend(self._run_ppompu())
+        # prod_details.extend(self._run_ppompu())
         prod_details.extend(self._run_ruliweb())
 
         self._save_json(prod_details)
