@@ -8,8 +8,8 @@ on:
       - main
 jobs:
   build-and-deploy:
-    - timeout-minutes: 60
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - name: Set up Python 3.9.1
         uses: actions/setup-python@v2
