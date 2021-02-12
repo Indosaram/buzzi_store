@@ -86,7 +86,7 @@ class MainCrawler:
             encoding='utf-8',
         ) as f:
             json.dump(jsondata, f, ensure_ascii=False, indent=4)
-        # self._upload_json()
+        self._upload_json()
         print('Finish saving .json')
 
     def _to_deeplink(self, link):
