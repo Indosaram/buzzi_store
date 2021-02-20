@@ -90,31 +90,30 @@ class MainCrawler:
         print('Finish saving .json')
 
     def _to_deeplink(self, link):
-        res = requests.get(
-            f"https://api.linkprice.com/ci/service/custom_link_xml"
-            + f"?a_id={self.param_common['linkprice_af_id']}"
-            + f"&url={quote(link, safe='')}&mode=json",
-        )
+        deeplink = link
 
-        deeplink = None
-        res_json = res.json()
-        if res_json['result'] == 'S' and res_json['url'] is not None:
-            deeplink = res_json['url']
-        else:
-            deeplink = link
+        try:
+            res = requests.get(
+                f"https://api.linkprice.com/ci/service/custom_link_xml"
+                + f"?a_id={self.param_common['linkprice_af_id']}"
+                + f"&url={quote(link, safe='')}&mode=json",
+            )
+            res_json = res.json()
+            if res_json['result'] == 'S' and res_json['url'] is not None:
+                deeplink = res_json['url']
+        except:
+            res = requests.get(
+                f"http://cutt.ly/api/api.php?"
+                + f"key={self.param_common['cuttly_api_key']}"
+                + f"&short={quote(deeplink, safe='')}"
+            )
+            res_json = res.json()['url']
+            if res_json['status'] in [1, 7]:
+                shortlink = res_json['shortLink']
+            else:
+                shortlink = deeplink
 
-        res = requests.get(
-            f"http://cutt.ly/api/api.php?"
-            + f"key={self.param_common['cuttly_api_key']}"
-            + f"&short={quote(deeplink, safe='')}"
-        )
-        res_json = res.json()['url']
-        if res_json['status'] in [1, 7]:
-            shortlink = res_json['shortLink']
-        else:
-            shortlink = deeplink
-
-        return shortlink
+            return shortlink
 
     def run(self):
         prod_details = []
