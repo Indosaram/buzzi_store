@@ -16,6 +16,7 @@ class SeleniumLoader:
             "translate_whitelists": {"en": "ko"},
             "translate": {"enabled": "true"},
         }
+        options.add_argument('--no-sandbox')
         options.add_experimental_option("prefs", prefs)
         options.add_experimental_option('excludeSwitches', ['enable-logging'])
 

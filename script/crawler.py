@@ -118,7 +118,7 @@ class MainCrawler:
     def run(self):
         prod_details = []
 
-        # prod_details.extend(self._run_ppompu())
+        prod_details.extend(self._run_ppompu())
         prod_details.extend(self._run_ruliweb())
 
         self._save_json(prod_details)
