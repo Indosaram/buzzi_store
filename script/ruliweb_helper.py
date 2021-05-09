@@ -41,10 +41,14 @@ class RuliwebHelper:
             prod_detail['shop'] = shop
 
             soup = bs(entry.get_attribute('innerHTML'), features="html.parser")
-            pre_category = soup.select_one("td[class='divsn']").text.replace(
+            category_path = soup.select_one("td[class='divsn text_over']")
+            if category_path is None:
+                continue
+            pre_category = soup.select_one("td[class='divsn text_over']").text.replace(
                 '\n', ''
             )
             category = category_manager(pre_category)
+
             if category is None:
                 continue
             prod_detail['category'] = category

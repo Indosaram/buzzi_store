@@ -134,6 +134,9 @@ class MainCrawler:
 if __name__ == "__main__":
     if platform.system() == 'Windows':
         webdriver_path = 'C:\\chromedriver\\chromedriver.exe'
+        from dotenv import load_dotenv
+        load_dotenv(verbose=True)
+
     else:
         webdriver_path = './script/chromedriver'
 
