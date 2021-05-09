@@ -67,7 +67,7 @@ class MainCrawler:
         data_ids = [entry['id'] for entry in data_old]
 
         data_final = []
-        for entry in data:
+        for idx, entry in enumerate(data):
             deeplink = self._to_deeplink(entry['link'])
             entry['link'] = deeplink if deeplink is not None else entry['link']
 
@@ -75,6 +75,8 @@ class MainCrawler:
                 data_old[data_ids.index(entry['id'])] = entry
             else:
                 data_final.append(entry)
+            print(f"-> Converting {idx+1}/{len(data)} links", end="\r")
+        print("")
 
         data_final.extend(data_old)
 
@@ -129,6 +131,7 @@ class MainCrawler:
 
     def _upload_json(self):
         self.cloudinary_helper.upload_file(self.param_common['json_path'])
+        print("-> json upload succeed")
 
 
 if __name__ == "__main__":
