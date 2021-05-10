@@ -104,21 +104,17 @@ class MainCrawler:
             if res_json['result'] == 'S' and res_json['url'] is not None:
                 deeplink = res_json['url']
             else:
-                print(f"Error occured when converting {link} in linkprice")
-        except:
-            res = requests.get(
-                f"http://cutt.ly/api/api.php?"
-                + f"key={self.param_common['cuttly_api_key']}"
-                + f"&short={quote(deeplink, safe='')}"
-            )
-            if "url" in res.json().keys():
-                res_json = res.json()['url']
-                if res_json['status'] in [1, 7]:
-                    deeplink = res_json['shortLink']
-            else:
-                print(f"Error occured when converting {link} in cutt.ly")
-        finally:
-            print("Cannot convert this link by any methods")
+                res = requests.get(
+                    f"http://cutt.ly/api/api.php?"
+                    + f"key={self.param_common['cuttly_api_key']}"
+                    + f"&short={quote(deeplink, safe='')}"
+                )
+                if "url" in res.json().keys():
+                    res_json = res.json()['url']
+                    if res_json['status'] in [1, 7]:
+                        deeplink = res_json['shortLink']
+        except Exception as e:
+            print("Cannot convert this link by any methods :", e)
 
         return deeplink
 
