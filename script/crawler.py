@@ -103,19 +103,22 @@ class MainCrawler:
             res_json = res.json()
             if res_json['result'] == 'S' and res_json['url'] is not None:
                 deeplink = res_json['url']
-        except:
+            else:
+                print(f"Error occured when converting {link} in linkprice")
+        except Exception:
             res = requests.get(
                 f"http://cutt.ly/api/api.php?"
                 + f"key={self.param_common['cuttly_api_key']}"
                 + f"&short={quote(deeplink, safe='')}"
             )
-            res_json = res.json()['url']
-            if res_json['status'] in [1, 7]:
-                shortlink = res_json['shortLink']
+            if "url" in res.json().keys():
+                res_json = res.json()['url']
+                if res_json['status'] in [1, 7]:
+                    deeplink = res_json['shortLink']
             else:
-                shortlink = deeplink
+                print(f"Error occured when converting {link} in cutt.ly")
 
-            return shortlink
+        return deeplink
 
     def run(self):
         prod_details = []
@@ -138,8 +141,14 @@ if __name__ == "__main__":
     if platform.system() == 'Windows':
         webdriver_path = 'C:\\chromedriver\\chromedriver.exe'
         from dotenv import load_dotenv
+
         load_dotenv(verbose=True)
 
+    elif platform.system() == 'Darwin':
+        webdriver_path = './script/chromedriver_mac'
+        from dotenv import load_dotenv
+
+        load_dotenv(verbose=True)
     else:
         webdriver_path = './script/chromedriver'
 
