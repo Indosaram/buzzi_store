@@ -105,7 +105,7 @@ class MainCrawler:
                 deeplink = res_json['url']
             else:
                 print(f"Error occured when converting {link} in linkprice")
-        except Exception:
+        except:
             res = requests.get(
                 f"http://cutt.ly/api/api.php?"
                 + f"key={self.param_common['cuttly_api_key']}"
@@ -117,6 +117,8 @@ class MainCrawler:
                     deeplink = res_json['shortLink']
             else:
                 print(f"Error occured when converting {link} in cutt.ly")
+        finally:
+            print("Cannot convert this link by any methods")
 
         return deeplink
 
