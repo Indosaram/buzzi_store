@@ -56,7 +56,17 @@ def _meta_from_prod_detail_page(link_to_prod):
     thumbnail = "https://buzzi.store/no_thumbnail.png"
     if thumbnail_meta is not None and "content" in thumbnail_meta.attrs:
         # Check whether thumbnail link is reachable
-        res = requests.get(thumbnail_meta["content"], headers=headers)
+        thumbnail_url = thumbnail_meta["content"]
+        parsed_url = urlparse(thumbnail_url)
+        if parsed_url.scheme:
+            res = requests.get(thumbnail_meta["content"], headers=headers)
+        else:
+            res = requests.get(
+                f"{url_parsed.scheme}://{url_parsed.netloc}"
+                f"{thumbnail_meta['content']}",
+                headers=headers,
+            )
+
         if res.status_code == 200:
             thumbnail = thumbnail_meta["content"]
 
