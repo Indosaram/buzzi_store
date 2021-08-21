@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - name: Set up Python 3.9.1
+      - name: Set up Python 3.8.2
         uses: actions/setup-python@v2
         with:
-          python-version: 3.9.1
+          python-version: 3.8.2
 
       - name: Set up pipenv
         uses: dschep/install-pipenv-action@v1
@@ -44,7 +44,6 @@ jobs:
           CLOUDINARY_API_KEY: ${{ secrets.CLOUDINARY_API_KEY }}
           CLOUDINARY_API_SECRET: ${{ secrets.CLOUDINARY_API_SECRET }}
         run: |
-          sudo chmod 755 ./script/chromedriver
           pipenv install
           pipenv run python ./script/crawler.py
           yarn install

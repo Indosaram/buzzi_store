@@ -1,13 +1,17 @@
-from bs4 import BeautifulSoup as bs
+"""Coolenjoy helper class"""
 
-from selenium_loader import SeleniumLoader
+from selenium_helper.selenium_loader import SeleniumLoader
 
 
 class CoolenjoyHelper:
+    """Coolenjoy helper class"""
+
     def __init__(self, param_common, param_coolenjoy):
-        selenium_loader = SeleniumLoader(param_common['webdriver_path'])
-        self.driver = selenium_loader.driver
-        self.driver_exceptions = selenium_loader.exceptions
+        self.driver = SeleniumLoader().driver
         self.json_path = param_common['json_path']
-        self.baseURL = param_coolenjoy['baseURL']
-        self.boardURL = param_coolenjoy['boardURL']
+        self.base_url = param_coolenjoy['base_url']
+        self.board_url = param_coolenjoy['board_url']
+
+    def run(self):
+        """Run crawling"""
+        return

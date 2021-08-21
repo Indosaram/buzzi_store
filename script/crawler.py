@@ -1,3 +1,5 @@
+"""Main crawler class"""
+
 import os
 import json
 import platform
@@ -14,55 +16,58 @@ from coolenjoy_helper import CoolenjoyHelper
 
 
 class MainCrawler:
-    def __init__(self, param) -> None:
-        self.param_common = param['common']
-        self.param_ppompu = param['ppompu']
-        self.param_clien = param['clien']
-        self.param_ruliweb = param['ruliweb']
-        self.param_coolnjoy = param['coolenjoy']
+    """Main crawler class"""
+
+    def __init__(self, parameter) -> None:
+        self.param_common = parameter['common']
+        self.param_ppompu = parameter['ppompu']
+        self.param_clien = parameter['clien']
+        self.param_ruliweb = parameter['ruliweb']
+        self.param_coolenjoy = parameter['coolenjoy']
 
         cloudinary_param = {
-            'cloud_name': param['common']['cloudinary_name'],
-            'api_key': param['common']['cloudinary_api_key'],
-            'api_secret': param['common']['cloudinary_api_secret'],
+            'cloud_name': parameter['common']['cloudinary_name'],
+            'api_key': parameter['common']['cloudinary_api_key'],
+            'api_secret': parameter['common']['cloudinary_api_secret'],
         }
         self.cloudinary_helper = CloudinaryHelper(cloudinary_param)
         self._download_json()
 
     def _run_ppompu(self):
-        ph = PpomppuHelper(self.param_common, self.param_ppompu)
-        prod_details = ph.run()
+        ppomppu_helper = PpomppuHelper(self.param_common, self.param_ppompu)
+        prod_details = ppomppu_helper.run()
 
         return prod_details
 
     def _run_clien(self):
-        ch = ClienHelper(self.param_common, self.param_clien)
-        prod_details = ch.run()
+        clien_helper = ClienHelper(self.param_common, self.param_clien)
+        prod_details = clien_helper.run()
 
         return prod_details
 
     def _run_coolenjoy(self):
-        ch = CoolenjoyHelper(self.param_common, self.param_coolenjoy)
-        prod_details = ch.run()
+        coolenjoy_helper = CoolenjoyHelper(
+            self.param_common, self.param_coolenjoy
+        )
+        prod_details = coolenjoy_helper.run()
 
         return prod_details
 
     def _run_ruliweb(self):
-        rh = RuliwebHelper(self.param_common, self.param_ruliweb)
-        prod_details = rh.run()
+        ruliweb_helper = RuliwebHelper(self.param_common, self.param_ruliweb)
+        prod_details = ruliweb_helper.run()
 
         return prod_details
 
     def _save_json(self, data):
         print('📋 Converting links to deep & short links')
 
-        data_old = json.load(
-            open(
-                self.param_common['json_path'],
-                'r',
-                encoding='utf-8',
-            )
-        )['products']
+        with open(
+            self.param_common['json_path'],
+            'r',
+            encoding='utf-8',
+        ) as file:
+            data_old = json.load(file)['products']
 
         data_ids = [entry['id'] for entry in data_old]
 
@@ -86,8 +91,8 @@ class MainCrawler:
             self.param_common['json_path'],
             'w',
             encoding='utf-8',
-        ) as f:
-            json.dump(jsondata, f, ensure_ascii=False, indent=4)
+        ) as file:
+            json.dump(jsondata, file, ensure_ascii=False, indent=4)
         self._upload_json()
         print('Finish saving .json')
 
@@ -96,29 +101,30 @@ class MainCrawler:
 
         try:
             res = requests.get(
-                f"https://api.linkprice.com/ci/service/custom_link_xml"
-                + f"?a_id={self.param_common['linkprice_af_id']}"
-                + f"&url={quote(link, safe='')}&mode=json",
+                "https://api.linkprice.com/ci/service/custom_link_xml"
+                f"?a_id={self.param_common['linkprice_af_id']}"
+                f"&url={quote(link, safe='')}&mode=json",
             )
             res_json = res.json()
             if res_json['result'] == 'S' and res_json['url'] is not None:
                 deeplink = res_json['url']
             else:
                 res = requests.get(
-                    f"http://cutt.ly/api/api.php?"
-                    + f"key={self.param_common['cuttly_api_key']}"
-                    + f"&short={quote(deeplink, safe='')}"
+                    "http://cutt.ly/api/api.php?"
+                    f"key={self.param_common['cuttly_api_key']}"
+                    f"&short={quote(deeplink, safe='')}"
                 )
                 if "url" in res.json().keys():
                     res_json = res.json()['url']
                     if res_json['status'] in [1, 7]:
                         deeplink = res_json['shortLink']
-        except Exception as e:
-            print("Cannot convert this link by any methods :", e)
+        except Exception as exc:
+            print("Cannot convert this link by any methods :", exc)
 
         return deeplink
 
     def run(self):
+        """Run main process"""
         prod_details = []
 
         prod_details.extend(self._run_ppompu())
@@ -127,7 +133,7 @@ class MainCrawler:
         self._save_json(prod_details)
 
     def _download_json(self):
-        url = self.cloudinary_helper._get_url('productsData.json')
+        url = self.cloudinary_helper.get_url('productsData.json')
         urlretrieve(url, self.param_common['json_path'])
 
     def _upload_json(self):
@@ -137,22 +143,22 @@ class MainCrawler:
 
 if __name__ == "__main__":
     if platform.system() == 'Windows':
-        webdriver_path = 'C:\\chromedriver\\chromedriver.exe'
+        WEBDRIVER_PATH = 'C:\\chromedriver\\chromedriver.exe'
         from dotenv import load_dotenv
 
         load_dotenv(verbose=True)
 
     elif platform.system() == 'Darwin':
-        webdriver_path = './script/chromedriver_mac'
+        WEBDRIVER_PATH = './script/chromedriver_mac'
         from dotenv import load_dotenv
 
         load_dotenv(verbose=True)
     else:
-        webdriver_path = './script/chromedriver'
+        WEBDRIVER_PATH = './script/chromedriver'
 
-    param = {
+    parameter = {
         'common': {
-            'webdriver_path': webdriver_path,
+            'webdriver_path': WEBDRIVER_PATH,
             'json_path': os.path.join(os.getcwd(), 'src', 'productsData.json'),
             'linkprice_af_id': os.getenv('LINKPRICE_AF_ID'),
             'cuttly_api_key': os.getenv('CUTTLY_API_KEY'),
@@ -161,16 +167,16 @@ if __name__ == "__main__":
             'cloudinary_api_secret': os.getenv('CLOUDINARY_API_SECRET'),
         },
         'ppompu': {
-            'baseURL': 'http://www.ppomppu.co.kr/zboard/',
-            'boardURL': 'http://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu&hotlist_flag=999',
+            'base_url': 'http://www.ppomppu.co.kr/zboard/',
+            'board_url': 'http://www.ppomppu.co.kr/zboard/zboard.php?id=ppomppu&hotlist_flag=999',
         },
         'ruliweb': {
-            'baseURL': 'https://bbs.ruliweb.com/news/board/1020',
-            'boardURL': 'https://bbs.ruliweb.com/news/board/1020?view_best=1',
+            'base_url': 'https://bbs.ruliweb.com/news/board/1020',
+            'board_url': 'https://bbs.ruliweb.com/news/board/1020?view_best=1',
         },
         'clien': {},
         'coolenjoy': {},
     }
 
-    mc = MainCrawler(param)
+    mc = MainCrawler(parameter)
     mc.run()

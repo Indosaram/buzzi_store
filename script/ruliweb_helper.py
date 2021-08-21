@@ -1,24 +1,29 @@
-import re
+"""Ruliweb helper class"""
+
 from datetime import datetime
 
+from selenium_helper.selenium_loader import SeleniumLoader
 from bs4 import BeautifulSoup as bs
 
-from selenium_loader import SeleniumLoader
-from exception import *
-from helper_common import *
+from helper_common import (
+    category_manager,
+    meta_from_prod_detail_page,
+    price_regex,
+)
 
 
 class RuliwebHelper:
+    """Ruliweb Helper class"""
+
     def __init__(self, param_common, param_ruliweb):
-        selenium_loader = SeleniumLoader(param_common['webdriver_path'])
-        self.driver = selenium_loader.driver
-        self.driver_exceptions = selenium_loader.exceptions
+        self.driver = SeleniumLoader().driver
         self.json_path = param_common['json_path']
-        self.baseURL = param_ruliweb['baseURL']
-        self.boardURL = param_ruliweb['boardURL']
+        self.base_url = param_ruliweb['base_url']
+        self.board_url = param_ruliweb['board_url']
 
     def run(self):
-        self.driver.get(self.boardURL)
+        """Run crawling"""
+        self.driver.get(self.board_url)
 
         print('🎁 루리웹')
         pre_prod_details = []
@@ -32,7 +37,8 @@ class RuliwebHelper:
                 ).text[1:-1]
                 if shop == '품절':
                     continue
-            except self.driver_exceptions.NoSuchElementException:
+            except Exception as exc:
+                print(exc)
                 shop = ''
 
             # Get product details
@@ -44,9 +50,9 @@ class RuliwebHelper:
             category_path = soup.select_one("td[class='divsn text_over']")
             if category_path is None:
                 continue
-            pre_category = soup.select_one("td[class='divsn text_over']").text.replace(
-                '\n', ''
-            )
+            pre_category = soup.select_one(
+                "td[class='divsn text_over']"
+            ).text.replace('\n', '')
             category = category_manager(pre_category)
 
             if category is None:
@@ -69,8 +75,8 @@ class RuliwebHelper:
             print(f'-> Processing {idx+1}/{len(pre_prod_details)}')
             try:
                 prod_details.append(self._get_product_data(prod_detail))
-            except Exception as e:
-                print(e)
+            except Exception as exc:
+                print(exc)
                 continue
 
         print(
@@ -113,8 +119,8 @@ class RuliwebHelper:
         # Parse prod page's metadata
         try:
             webelement = self.driver.find_element_by_class_name('source_url')
-        except:
-            raise NoUrlExistError('No product URL exsits')
+        except Exception as exc:
+            print(exc, 'No product URL exsits')
         link_to_prod = webelement.text.split(' ')[-1]
 
         (

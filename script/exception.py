@@ -1,31 +1,34 @@
-class NotAnUrlError(Exception):
+"""Exceptions"""
 
-    # Constructor or Initializer
+
+class NotAnUrlError(Exception):
+    """Raised when result is not an url"""
+
     def __init__(self, value):
+        super().__init__()
         self.value = value
 
-    # __str__ is to print() the value
     def __str__(self):
         return repr(self.value)
+
 
 class NoUrlExistError(Exception):
+    """Raised when there is no url"""
 
-    # Constructor or Initializer
     def __init__(self, value):
+        super().__init__()
         self.value = value
 
-    # __str__ is to print() the value
     def __str__(self):
         return repr(self.value)
+
 
 class InvalidMetadataError(Exception):
+    """Raised when metadata is invalid"""
 
-    # Constructor or Initializer
     def __init__(self, value):
+        super().__init__()
         self.value = value
 
-    # __str__ is to print() the value
     def __str__(self):
         return repr(self.value)
-
-        

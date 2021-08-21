@@ -1,11 +1,14 @@
-import requests
+"""Common helper functions"""
+
+
 import hashlib
 import re
-
-from bs4 import BeautifulSoup as bs
 from urllib.parse import urlparse
 
-from exception import *
+from bs4 import BeautifulSoup as bs
+import requests
+
+from exception import NotAnUrlError, InvalidMetadataError
 
 
 def meta_from_prod_detail_page(link_to_prod):
@@ -15,14 +18,13 @@ def meta_from_prod_detail_page(link_to_prod):
     url_parsed = urlparse(link_to_prod)
 
     headers = {
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36",
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/88.0.4324.96 Safari/537.36"
     }
 
     if '.' in url_parsed.netloc:
-        try:
-            res = requests.get(link_to_prod, headers=headers)
-        except Exception as e:
-            raise e
+        res = requests.get(link_to_prod, headers=headers)
         if res.reason == 'OK':
             link = res.url
         else:
@@ -33,24 +35,22 @@ def meta_from_prod_detail_page(link_to_prod):
     soup = bs(res.text, features="html.parser")
     try:
         thumbnail = soup.find('meta', {"property": "og:image"})['content']
-        try:
-            res = requests.get(thumbnail, headers=headers)
-        except Exception as e:
-            raise e
+        res = requests.get(thumbnail, headers=headers)
         if res.reason != 'OK':
             thumbnail = "https://buzzi.store/buzzi-store-logo.png"
 
         title = soup.find('meta', {"property": "og:title"})['content']
-        id = hashlib.sha1(title.encode()).hexdigest()
-    except:
+        item_id = hashlib.sha1(title.encode()).hexdigest()
+    except Exception as exc:
         raise InvalidMetadataError(
             'This website does not provide valid meta tags.'
-        )
+        ) from exc
 
-    return link, thumbnail, title, id
+    return link, thumbnail, title, item_id
 
 
 def category_manager(category):
+    """Pre-defined categories"""
     categories = {
         **dict.fromkeys(
             ['인터넷', '이벤트', '생활용품', '기타'],
@@ -125,10 +125,11 @@ def category_manager(category):
     }
     if category in categories.keys():
         return categories[category]
-    else:
-        return None
+
+    return None
 
 
 def price_regex(string):
+    """Extract price from a given string"""
     regex = re.compile(r"\d{1,}(,\d+)?원").search(string)
     return regex.group() if regex is not None else None
