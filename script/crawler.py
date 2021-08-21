@@ -129,20 +129,17 @@ class MainCrawler:
 
         deeplink = link
 
-        try:
-            res = requests.get(
-                "https://api.linkprice.com/ci/service/custom_link_xml"
-                f"?a_id={self.param_common['linkprice_af_id']}"
-                f"&url={quote(link, safe='')}&mode=json",
-                verify=False,
-            )
-            res_json = res.json()
-            if res_json['result'] == 'S' and res_json['url'] is not None:
-                deeplink = to_cuttly(res_json['url'])
-            else:
-                print("No merchant info in linkprice:", link)
-        # except Exception as exc:
-        #     print("Cannot convert this link by any methods :", exc)
+        res = requests.get(
+            "https://api.linkprice.com/ci/service/custom_link_xml"
+            f"?a_id={self.param_common['linkprice_af_id']}"
+            f"&url={quote(link, safe='')}&mode=json",
+            verify=False,
+        )
+        res_json = res.json()
+        if res_json['result'] == 'S' and res_json['url'] is not None:
+            deeplink = to_cuttly(res_json['url'])
+        else:
+            print("No merchant info in linkprice:", link)
 
         return deeplink
 
