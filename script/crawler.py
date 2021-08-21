@@ -25,14 +25,7 @@ class MainCrawler:
         self.param_ruliweb = parameter['ruliweb']
         self.param_coolenjoy = parameter['coolenjoy']
 
-        cloudinary_param = {
-            'cloud_name': parameter['common']['cloudinary_name'],
-            'api_key': parameter['common']['cloudinary_api_key'],
-            'api_secret': parameter['common']['cloudinary_api_secret'],
-        }
-        self.cloudinary_helper = CloudinaryHelper(
-            cloudinary_param["cloud_name"]
-        )
+        self.cloudinary_helper = CloudinaryHelper("buzzistore")
         self._download_json()
 
     def _run_ppompu(self):
@@ -164,9 +157,6 @@ if __name__ == "__main__":
             'json_path': os.path.join(os.getcwd(), 'src', 'productsData.json'),
             'linkprice_af_id': os.getenv('LINKPRICE_AF_ID'),
             'cuttly_api_key': os.getenv('CUTTLY_API_KEY'),
-            'cloudinary_name': os.getenv('CLOUDINARY_NAME'),
-            'cloudinary_api_key': os.getenv('CLOUDINARY_API_KEY'),
-            'cloudinary_api_secret': os.getenv('CLOUDINARY_API_SECRET'),
         },
         'ppompu': {
             'base_url': 'http://www.ppomppu.co.kr/zboard/',
