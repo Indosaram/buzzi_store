@@ -27,6 +27,21 @@ class MainCrawler:
 
         self.cloudinary_helper = CloudinaryHelper("buzzistore")
         self._download_json()
+        self._disable_ssl_warning()
+
+    @staticmethod
+    def _disable_ssl_warning():
+        requests.packages.urllib3.disable_warnings()
+        requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += (
+            ':HIGH:!DH:!aNULL'
+        )
+        try:
+            requests.packages.urllib3.contrib.pyopenssl.util.ssl_.DEFAULT_CIPHERS += (
+                ':HIGH:!DH:!aNULL'
+            )
+        except AttributeError:
+            # no pyopenssl support used / needed / available
+            pass
 
     def _run_ppompu(self):
         ppomppu_helper = PpomppuHelper(self.param_common, self.param_ppompu)
@@ -99,20 +114,26 @@ class MainCrawler:
                 "https://api.linkprice.com/ci/service/custom_link_xml"
                 f"?a_id={self.param_common['linkprice_af_id']}"
                 f"&url={quote(link, safe='')}&mode=json",
+                verify=False,
             )
             res_json = res.json()
             if res_json['result'] == 'S' and res_json['url'] is not None:
                 deeplink = res_json['url']
             else:
                 res = requests.get(
-                    "http://cutt.ly/api/api.php?"
+                    "https://cutt.ly/api/api.php?"
                     f"key={self.param_common['cuttly_api_key']}"
-                    f"&short={quote(deeplink, safe='')}"
+                    f"&short={quote(deeplink, safe='')}",
+                    verify=False,
                 )
                 if "url" in res.json().keys():
                     res_json = res.json()['url']
                     if res_json['status'] in [1, 7]:
                         deeplink = res_json['shortLink']
+                    else:
+                        print("Invalid request has been sent to cutt.ly api")
+                else:
+                    print("Invalid response from cutt.ly server")
         except Exception as exc:
             print("Cannot convert this link by any methods :", exc)
 
