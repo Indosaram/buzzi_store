@@ -1,5 +1,6 @@
 """Main crawler class"""
 
+from json.decoder import JSONDecodeError
 import os
 import json
 import platform
@@ -18,12 +19,12 @@ from coolenjoy_helper import CoolenjoyHelper
 class MainCrawler:
     """Main crawler class"""
 
-    def __init__(self, parameter) -> None:
-        self.param_common = parameter['common']
-        self.param_ppompu = parameter['ppompu']
-        self.param_clien = parameter['clien']
-        self.param_ruliweb = parameter['ruliweb']
-        self.param_coolenjoy = parameter['coolenjoy']
+    def __init__(self, parameters) -> None:
+        self.param_common = parameters['common']
+        self.param_ppompu = parameters['ppompu']
+        self.param_clien = parameters['clien']
+        self.param_ruliweb = parameters['ruliweb']
+        self.param_coolenjoy = parameters['coolenjoy']
 
         self.cloudinary_helper = CloudinaryHelper("buzzistore")
         self._download_json()
@@ -31,10 +32,11 @@ class MainCrawler:
 
     @staticmethod
     def _disable_ssl_warning():
-        requests.packages.urllib3.disable_warnings()
-        requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += (
+        requests.packages.urllib3.disable_warnings()  # pylint: disable=no-member
+        requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS += (  # pylint: disable=no-member
             ':HIGH:!DH:!aNULL'
         )
+
         try:
             requests.packages.urllib3.contrib.pyopenssl.util.ssl_.DEFAULT_CIPHERS += (
                 ':HIGH:!DH:!aNULL'
@@ -107,6 +109,24 @@ class MainCrawler:
         print('Finish saving .json')
 
     def _to_deeplink(self, link):
+        def to_cuttly(deeplink):
+            try:
+                res = requests.get(
+                    "https://cutt.ly/api/api.php?"
+                    f"key={self.param_common['cuttly_api_key']}"
+                    f"&short={quote(deeplink, safe='')}",
+                    verify=False,
+                )
+                res_json = res.json()['url']
+                if res_json['status'] in [1, 7]:
+                    deeplink = res_json['shortLink']
+                else:
+                    print("Invalid request has been sent to cutt.ly api")
+            except JSONDecodeError as exc:
+                print(exc, res.text)
+
+            return deeplink
+
         deeplink = link
 
         try:
@@ -118,24 +138,11 @@ class MainCrawler:
             )
             res_json = res.json()
             if res_json['result'] == 'S' and res_json['url'] is not None:
-                deeplink = res_json['url']
+                deeplink = to_cuttly(res_json['url'])
             else:
-                res = requests.get(
-                    "https://cutt.ly/api/api.php?"
-                    f"key={self.param_common['cuttly_api_key']}"
-                    f"&short={quote(deeplink, safe='')}",
-                    verify=False,
-                )
-                if "url" in res.json().keys():
-                    res_json = res.json()['url']
-                    if res_json['status'] in [1, 7]:
-                        deeplink = res_json['shortLink']
-                    else:
-                        print("Invalid request has been sent to cutt.ly api")
-                else:
-                    print("Invalid response from cutt.ly server")
-        except Exception as exc:
-            print("Cannot convert this link by any methods :", exc)
+                print("No merchant info in linkprice:", link)
+        # except Exception as exc:
+        #     print("Cannot convert this link by any methods :", exc)
 
         return deeplink
 
@@ -191,5 +198,5 @@ if __name__ == "__main__":
         'coolenjoy': {},
     }
 
-    mc = MainCrawler(parameter)
-    mc.run()
+    main_crawler = MainCrawler(parameter)
+    main_crawler.run()

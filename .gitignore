@@ -10,6 +10,8 @@
 
 # production
 /build
+chromedriver
+src/productsData.json
 
 # misc
 .DS_Store

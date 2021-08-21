@@ -15,6 +15,13 @@ def meta_from_prod_detail_page(link_to_prod):
     """
     return: link, thumbnail, title, id
     """
+    try:
+        return _meta_from_prod_detail_page(link_to_prod)
+    except (InvalidMetadataError, NotAnUrlError, ConnectionError):
+        return None
+
+
+def _meta_from_prod_detail_page(link_to_prod):
     url_parsed = urlparse(link_to_prod)
 
     headers = {
@@ -25,26 +32,39 @@ def meta_from_prod_detail_page(link_to_prod):
 
     if '.' in url_parsed.netloc:
         res = requests.get(link_to_prod, headers=headers)
-        if res.reason == 'OK':
+        if res.status_code == 200:
             link = res.url
         else:
-            raise ConnectionError
+            raise ConnectionError(link_to_prod)
     else:
         raise NotAnUrlError(f'Invalid URL detected : {link_to_prod}')
 
     soup = bs(res.text, features="html.parser")
-    try:
-        thumbnail = soup.find('meta', {"property": "og:image"})['content']
-        res = requests.get(thumbnail, headers=headers)
-        if res.reason != 'OK':
-            thumbnail = "https://buzzi.store/buzzi-store-logo.png"
+    thumbnail_meta = soup.find('meta', {"property": "og:image"})
+    thumbnail = "https://buzzi.store/buzzi-store-logo.png"
+    if thumbnail_meta is not None and "content" in thumbnail_meta:
+        # Check whether thumbnail link is reachable
+        res = requests.get(thumbnail_meta["content"], headers=headers)
+        if res.status_code == 200:
+            thumbnail = thumbnail_meta["content"]
 
-        title = soup.find('meta', {"property": "og:title"})['content']
-        item_id = hashlib.sha1(title.encode()).hexdigest()
-    except Exception as exc:
+    og_title_meta = soup.find('meta', {"property": "og:title"})
+    og_title = ""
+    if og_title_meta is not None and "content" in og_title_meta:
+        og_title = og_title_meta["content"]
+
+    title_meta = soup.find('title')
+    title = ""
+    if title_meta is not None:
+        title = title_meta.text
+
+    if title is None and og_title is None:
         raise InvalidMetadataError(
-            'This website does not provide valid meta tags.'
-        ) from exc
+            f"This website does not provide valid meta tags: {link_to_prod}"
+        )
+
+    title = max([title, og_title], key=len)
+    item_id = hashlib.sha1(title.encode()).hexdigest()
 
     return link, thumbnail, title, item_id
 

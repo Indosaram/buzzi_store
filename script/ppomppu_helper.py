@@ -34,11 +34,9 @@ class PpomppuHelper:
         print('🎁 뽐뿌')
         for idx, route in enumerate(routes):
             print(f'-> Processing {idx+1}/{len(routes)}')
-            try:
-                prod_details.append(self._get_product_data(route))
-            except Exception as exc:
-                print(exc)
-                continue
+            product_data = self._get_product_data(route)
+            if product_data is not None:
+                prod_details.append(product_data)
         print(f'✅ Processed {len(prod_details)}/{len(routes)} entries')
         self.driver.close()
 
@@ -48,7 +46,8 @@ class PpomppuHelper:
         self.driver.get(self.base_url + route)
 
         if '품절 / 종결 / 취소된 게시물입니다.' in self.driver.page_source:
-            raise KeyError
+            print("This deal is already closed.")
+            return None
 
         # Get product details
         prod_detail = {}
@@ -106,11 +105,15 @@ class PpomppuHelper:
             'wordfix'
         ).text.split(' ')[1]
 
-        (
-            prod_detail['link'],
-            prod_detail['thumbnail'],
-            prod_detail['title'],
-            prod_detail['id'],
-        ) = meta_from_prod_detail_page(link_to_prod)
+        result = meta_from_prod_detail_page(link_to_prod)
+        if result is not None:
+            (
+                prod_detail['link'],
+                prod_detail['thumbnail'],
+                prod_detail['title'],
+                prod_detail['id'],
+            ) = result
+        else:
+            return None
 
         return prod_detail

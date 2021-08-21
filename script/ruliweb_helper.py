@@ -3,6 +3,7 @@
 from datetime import datetime
 
 from selenium_helper.selenium_loader import SeleniumLoader
+from selenium.common.exceptions import NoSuchElementException
 from bs4 import BeautifulSoup as bs
 
 from helper_common import (
@@ -37,8 +38,7 @@ class RuliwebHelper:
                 ).text[1:-1]
                 if shop == '품절':
                     continue
-            except Exception as exc:
-                print(exc)
+            except NoSuchElementException:
                 shop = ''
 
             # Get product details
@@ -73,11 +73,9 @@ class RuliwebHelper:
         prod_details = []
         for idx, prod_detail in enumerate(pre_prod_details):
             print(f'-> Processing {idx+1}/{len(pre_prod_details)}')
-            try:
-                prod_details.append(self._get_product_data(prod_detail))
-            except Exception as exc:
-                print(exc)
-                continue
+            product_data = self._get_product_data(prod_detail)
+            if product_data is not None:
+                prod_details.append(product_data)
 
         print(
             f'✅ Processed {len(prod_details)}/{len(pre_prod_details)} entries'
@@ -119,15 +117,21 @@ class RuliwebHelper:
         # Parse prod page's metadata
         try:
             webelement = self.driver.find_element_by_class_name('source_url')
-        except Exception as exc:
-            print(exc, 'No product URL exsits')
+        except NoSuchElementException:
+            print('No product URL exsits: ', prod_detail['origin_url'])
+            return None
+
         link_to_prod = webelement.text.split(' ')[-1]
 
-        (
-            prod_detail['link'],
-            prod_detail['thumbnail'],
-            prod_detail['title'],
-            prod_detail['id'],
-        ) = meta_from_prod_detail_page(link_to_prod)
+        result = meta_from_prod_detail_page(link_to_prod)
+        if result is not None:
+            (
+                prod_detail['link'],
+                prod_detail['thumbnail'],
+                prod_detail['title'],
+                prod_detail['id'],
+            ) = result
+        else:
+            return None
 
         return prod_detail
