@@ -30,6 +30,8 @@ const useStyles = makeStyles({
     height: 0,
     paddingTop: "100%", // 16:9
   },
+  media__wrapper: {
+  },
   title: {
     height: 62,
   },
@@ -149,7 +151,9 @@ function ProductCard({
   return (
     <MuiThemeProvider theme={theme}>
       <Card className={{ root: classes.card }} elevation={10}>
-        <CardMedia className={classes.media} image={thumbnail} title={title} />
+        <div className={classes.media__wrapper}>
+          <CardMedia className={classes.media} image={thumbnail} title={title} />
+        </div>
         <CardContent>
           <div className={classes.title}>
             <Link target="_blank" href={link}>

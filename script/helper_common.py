@@ -6,9 +6,14 @@ import re
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup as bs
+from selenium_helper.selenium_loader import SeleniumLoader
 import requests
 
 from exception import NotAnUrlError, InvalidMetadataError
+
+SPECIAL_SITES = [
+    "hiver.co.kr",
+]
 
 
 def meta_from_prod_detail_page(link_to_prod):
@@ -40,9 +45,16 @@ def _meta_from_prod_detail_page(link_to_prod):
         raise NotAnUrlError(f'Invalid URL detected : {link_to_prod}')
 
     soup = bs(res.text, features="html.parser")
+    for site in SPECIAL_SITES:
+        if site in link_to_prod:
+            driver = SeleniumLoader().driver
+            driver.get(link_to_prod)
+            soup = bs(driver.page_source, features="html.parser")
+            break
+
     thumbnail_meta = soup.find('meta', {"property": "og:image"})
-    thumbnail = "https://buzzi.store/buzzi-store-logo.png"
-    if thumbnail_meta is not None and "content" in thumbnail_meta:
+    thumbnail = "https://buzzi.store/no_thumbnail.png"
+    if thumbnail_meta is not None and "content" in thumbnail_meta.attrs:
         # Check whether thumbnail link is reachable
         res = requests.get(thumbnail_meta["content"], headers=headers)
         if res.status_code == 200:
@@ -50,7 +62,7 @@ def _meta_from_prod_detail_page(link_to_prod):
 
     og_title_meta = soup.find('meta', {"property": "og:title"})
     og_title = ""
-    if og_title_meta is not None and "content" in og_title_meta:
+    if og_title_meta is not None and "content" in og_title_meta.attrs:
         og_title = og_title_meta["content"]
 
     title_meta = soup.find('title')
