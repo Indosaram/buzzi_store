@@ -2,8 +2,6 @@
 
 import os
 
-from dotenv import load_dotenv
-
 import cloudinary
 import cloudinary.uploader
 import cloudinary.api
@@ -12,10 +10,9 @@ import cloudinary.api
 class CloudinaryHelper:
     """Cloudinary helper class"""
 
-    def __init__(self, folder_name, env_path=".env"):
-        load_dotenv(env_path)
+    def __init__(self, folder_name):
         self.saving_folder_name = folder_name
-        self.cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME")
+        self.cloud_name = os.getenv("CLOUDINARY_NAME")
         self.client = cloudinary
         self.client.config(
             cloud_name=self.cloud_name,

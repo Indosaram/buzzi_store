@@ -30,7 +30,9 @@ class MainCrawler:
             'api_key': parameter['common']['cloudinary_api_key'],
             'api_secret': parameter['common']['cloudinary_api_secret'],
         }
-        self.cloudinary_helper = CloudinaryHelper(cloudinary_param)
+        self.cloudinary_helper = CloudinaryHelper(
+            cloudinary_param["cloud_name"]
+        )
         self._download_json()
 
     def _run_ppompu(self):
