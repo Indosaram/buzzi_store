@@ -2,6 +2,7 @@
 
 
 import hashlib
+import socket
 import re
 from urllib.parse import urlparse
 
@@ -11,10 +12,6 @@ import requests
 
 from exception import NotAnUrlError, InvalidMetadataError
 
-SPECIAL_SITES = [
-    "hiver.co.kr",
-]
-
 
 def meta_from_prod_detail_page(link_to_prod):
     """
@@ -22,7 +19,12 @@ def meta_from_prod_detail_page(link_to_prod):
     """
     try:
         return _meta_from_prod_detail_page(link_to_prod)
-    except (InvalidMetadataError, NotAnUrlError, ConnectionError):
+    except (
+        InvalidMetadataError,
+        NotAnUrlError,
+        ConnectionError,
+        socket.gaierror,
+    ):
         return None
 
 
@@ -44,13 +46,9 @@ def _meta_from_prod_detail_page(link_to_prod):
     else:
         raise NotAnUrlError(f'Invalid URL detected : {link_to_prod}')
 
-    soup = bs(res.text, features="html.parser")
-    for site in SPECIAL_SITES:
-        if site in link_to_prod:
-            driver = SeleniumLoader().driver
-            driver.get(link_to_prod)
-            soup = bs(driver.page_source, features="html.parser")
-            break
+    driver = SeleniumLoader().driver
+    driver.get(link_to_prod)
+    soup = bs(driver.page_source, features="html.parser")
 
     thumbnail_meta = soup.find('meta', {"property": "og:image"})
     thumbnail = "https://buzzi.store/no_thumbnail.png"
@@ -59,14 +57,14 @@ def _meta_from_prod_detail_page(link_to_prod):
         thumbnail_url = thumbnail_meta["content"]
         parsed_url = urlparse(thumbnail_url)
         if parsed_url.scheme:
-            res = requests.get(thumbnail_meta["content"], headers=headers)
+            url = thumbnail_meta["content"]
         else:
-            res = requests.get(
+            url = (
                 f"{url_parsed.scheme}://{url_parsed.netloc}"
                 f"{thumbnail_meta['content']}",
-                headers=headers,
             )
 
+        res = requests.get(url, headers=headers)
         if res.status_code == 200:
             thumbnail = thumbnail_meta["content"]
 
