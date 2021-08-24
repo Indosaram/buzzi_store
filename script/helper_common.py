@@ -7,10 +7,12 @@ import re
 from urllib.parse import urlparse
 
 from bs4 import BeautifulSoup as bs
+from requests.models import InvalidURL
 from selenium_helper.selenium_loader import SeleniumLoader
+from selenium.common.exceptions import TimeoutException
 import requests
 
-from exception import NotAnUrlError, InvalidMetadataError
+from exception import NotAnUrlError, InvalidMetadataError, UrlUnreachableError
 
 
 def meta_from_prod_detail_page(link_to_prod):
@@ -23,6 +25,7 @@ def meta_from_prod_detail_page(link_to_prod):
         InvalidMetadataError,
         NotAnUrlError,
         ConnectionError,
+        UrlUnreachableError,
         socket.gaierror,
     ):
         return None
@@ -47,7 +50,11 @@ def _meta_from_prod_detail_page(link_to_prod):
         raise NotAnUrlError(f'Invalid URL detected : {link_to_prod}')
 
     driver = SeleniumLoader().driver
-    driver.get(link_to_prod)
+    try:
+        driver.get(link_to_prod)
+    except TimeoutException as exc:
+        raise UrlUnreachableError(link_to_prod) from exc
+
     soup = bs(driver.page_source, features="html.parser")
 
     thumbnail_meta = soup.find('meta', {"property": "og:image"})
@@ -61,12 +68,15 @@ def _meta_from_prod_detail_page(link_to_prod):
         else:
             url = (
                 f"{url_parsed.scheme}://{url_parsed.netloc}"
-                f"{thumbnail_meta['content']}",
+                f"{thumbnail_meta['content']}"
             )
 
-        res = requests.get(url, headers=headers)
-        if res.status_code == 200:
-            thumbnail = thumbnail_meta["content"]
+        try:
+            res = requests.get(url, headers=headers)
+            if res.status_code == 200:
+                thumbnail = thumbnail_meta["content"]
+        except InvalidURL:
+            print("Invalid thumbnail URL. Using default image.")
 
     og_title_meta = soup.find('meta', {"property": "og:title"})
     og_title = ""

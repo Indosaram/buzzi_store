@@ -23,6 +23,17 @@ class NoUrlExistError(Exception):
         return repr(self.value)
 
 
+class UrlUnreachableError(Exception):
+    """Raised when url is not reachable"""
+
+    def __init__(self, value):
+        super().__init__()
+        self.value = value
+
+    def __str__(self):
+        return repr(self.value)
+
+
 class InvalidMetadataError(Exception):
     """Raised when metadata is invalid"""
 
