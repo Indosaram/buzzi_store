@@ -41,11 +41,15 @@ def _meta_from_prod_detail_page(link_to_prod):
     }
 
     if '.' in url_parsed.netloc:
-        res = requests.get(link_to_prod, headers=headers)
-        if res.status_code == 200:
-            link = res.url
-        else:
-            raise ConnectionError(link_to_prod)
+        try:
+            res = requests.get(link_to_prod, headers=headers)
+            if res.status_code == 200:
+                link = res.url
+            else:
+                raise ConnectionError(link_to_prod)
+        except Exception as exc:
+            raise ConnectionError(link_to_prod) from exc
+
     else:
         raise NotAnUrlError(f'Invalid URL detected : {link_to_prod}')
 
