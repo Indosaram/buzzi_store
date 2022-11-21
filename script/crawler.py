@@ -196,4 +196,7 @@ if __name__ == "__main__":
     }
 
     main_crawler = MainCrawler(parameter)
-    main_crawler.run()
+    try:
+        main_crawler.run()
+    except:
+        pass
